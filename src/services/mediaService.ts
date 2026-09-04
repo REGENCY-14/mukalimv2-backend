@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { categories, contentItems, media, mediaTranslations } from "../db/schema";
 import { emptyLocalizedText, type LocalizedText } from "../types/localized";
@@ -31,15 +31,15 @@ async function attachUsage(rows: (typeof media.$inferSelect)[]) {
   const ids = rows.map((r) => r.id);
 
   const [translations, categoryUses, contentUses] = await Promise.all([
-    db.select().from(mediaTranslations).where(sql`${mediaTranslations.mediaId} = ANY(${ids})`),
+    db.select().from(mediaTranslations).where(inArray(mediaTranslations.mediaId, ids)),
     db
       .select({ url: categories.iconUrl, name: categories.slug, categoryId: categories.id, kind: sql<string>`'icon'` })
       .from(categories)
-      .where(sql`${categories.iconUrl} = ANY(${urls}) OR ${categories.heroImageUrl} = ANY(${urls})`),
+      .where(or(inArray(categories.iconUrl, urls), inArray(categories.heroImageUrl, urls))),
     db
       .select({ url: contentItems.featuredImageUrl, slug: contentItems.slug, categoryId: contentItems.categoryId })
       .from(contentItems)
-      .where(sql`${contentItems.featuredImageUrl} = ANY(${urls})`),
+      .where(inArray(contentItems.featuredImageUrl, urls)),
   ]);
 
   const byMedia = new Map<string, typeof translations>();

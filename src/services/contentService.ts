@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { categories, contentItems, contentTranslations, users } from "../db/schema";
 import { emptyLocalizedText, type LocalizedText, type PublicLocale } from "../types/localized";
@@ -54,9 +54,9 @@ async function attachAdminFields(rows: (typeof contentItems.$inferSelect)[]) {
   const authorIds = [...new Set(rows.map((r) => r.authorId).filter((id): id is string => Boolean(id)))];
 
   const [translations, authors] = await Promise.all([
-    db.select().from(contentTranslations).where(sql`${contentTranslations.contentId} = ANY(${ids})`),
+    db.select().from(contentTranslations).where(inArray(contentTranslations.contentId, ids)),
     authorIds.length
-      ? db.select({ id: users.id, name: users.name }).from(users).where(sql`${users.id} = ANY(${authorIds})`)
+      ? db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, authorIds))
       : Promise.resolve([]),
   ]);
 
