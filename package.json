@@ -7,7 +7,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "node -e \"const tsPath=require.resolve('typescript/package.json'); const ts=require(tsPath); console.log('[build] typescript', ts.version, 'resolved from', tsPath); console.log('[build] node', process.version)\" && tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",

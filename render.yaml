@@ -17,7 +17,12 @@ services:
     runtime: node
     plan: starter
     region: frankfurt # closest Render region to the eu-north-1 Supabase project; change if needed
-    buildCommand: npm ci && npm run build
+    # --include=dev is required: NODE_ENV=production is set as an env var
+    # below, and Render applies configured env vars during the build phase
+    # too — plain `npm ci` reads NODE_ENV=production and silently skips
+    # devDependencies (including typescript itself), breaking the build.
+    # See docs/render-deploy.md for how this was diagnosed.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /health
     # Runs after a successful build, before traffic is switched to the new

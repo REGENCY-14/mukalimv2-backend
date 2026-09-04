@@ -1,11 +1,41 @@
 # Deploying to Render
 
-The repo is deployable via Render's standard "Web Service" flow with no
-special setup — `npm ci && npm run build` / `npm start` are auto-detected
-from `package.json`. `render.yaml` is provided for a reproducible,
-git-reviewable version of the same config if you'd rather deploy via a
-[Blueprint](https://render.com/docs/blueprint-spec) instead of the manual
-wizard; either path works.
+The repo is deployable via Render's standard "Web Service" flow. `render.yaml`
+is provided for a reproducible, git-reviewable version of the same config if
+you'd rather deploy via a [Blueprint](https://render.com/docs/blueprint-spec)
+instead of the manual wizard; either path works.
+
+## ⚠️ Build Command must be `npm ci --include=dev && npm run build`
+
+**Not** the `npm install` Render auto-fills, and **not** plain `npm ci` either
+— both silently break the build. Full story, since it took several rounds to
+actually pin down:
+
+1. Render's default auto-filled Build Command was `npm install` with no
+   `npm run build` step at all, so `dist/` was never created and the Start
+   Command (`node dist/server.js`) failed with `Cannot find module`.
+2. Switching to `npm ci && npm run build` seemed right, but still failed —
+   with confusing, inconsistent-looking TypeScript config errors that didn't
+   reproduce locally no matter what `tsconfig.json` changes were tried.
+3. **Actual root cause**: `NODE_ENV=production` is set as an env var on the
+   service (correctly, per the checklist below) — but Render applies
+   dashboard env vars during the *build* phase too, not just at runtime. A
+   plain `npm ci` (or `npm install`) reads `NODE_ENV=production` and treats
+   it as a signal to skip **devDependencies** — which includes `typescript`
+   itself. Confirmed directly: `NODE_ENV=production npm ci` installs ~139
+   packages here; a normal full install is ~174. Without `typescript` in
+   `node_modules`, `npm run build`'s `tsc` command falls through PATH to
+   whatever *other* `tsc` happens to exist in Render's build image (unrelated
+   version, different defaults) — which is what produced the misleading,
+   inconsistent config errors in step 2.
+4. Fix: `npm ci --include=dev` forces devDependencies to install regardless
+   of `NODE_ENV`. Confirmed: `NODE_ENV=production npm ci --include=dev`
+   installs the full ~174 packages, `typescript` present, real build runs.
+
+If you set up the service before this was documented, check **Settings →
+Build & Deploy → Build Command** and update it by hand — `render.yaml` alone
+won't fix an already-created service; Render doesn't re-read Blueprint
+changes for services created via the manual wizard.
 
 ## What was fixed in the repo for this
 
@@ -66,8 +96,10 @@ will conflict with Render's own assignment.
 1. **Create the Web Service**: New → Web Service → connect the
    `REGENCY-14/mukalimv2-backend` GitHub repo. If you use `render.yaml`,
    pick "New → Blueprint" instead and point it at this repo.
-2. **Runtime**: Node. Build command `npm ci && npm run build`, start
-   command `npm start` (auto-filled if using the Blueprint).
+2. **Runtime**: Node. Build command `npm ci --include=dev && npm run build`
+   (not Render's auto-filled `npm install` — see the warning above for why
+   `--include=dev` specifically matters), start command `npm start`
+   (auto-filled if using the Blueprint).
 3. **Environment variables**: enter every row from the checklist above
    under Settings → Environment.
 4. **Health check path**: set to `/health` (Settings → Health Check Path) —
