@@ -3,7 +3,6 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "CommonJS",
-    "moduleResolution": "Node",
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
@@ -14,11 +13,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": false,
-    "noImplicitOverride": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "noImplicitOverride": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "uploads"]
