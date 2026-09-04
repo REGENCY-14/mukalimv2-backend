@@ -88,6 +88,17 @@ src/
    | sam@mukalim.com | viewer | active |
    | chidi@mukalim.com | viewer | disabled |
 
+   Full record counts after seeding (verify with a `count(*)` on each table
+   if a re-seed ever looks off):
+
+   | Table | Rows |
+   |---|---|
+   | `categories` | 5 |
+   | `content_items` | 15 |
+   | `media` | 23 |
+   | `users` | 5 |
+   | `activity_log` | 7 |
+
 6. **Run it**
 
    ```bash

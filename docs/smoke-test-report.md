@@ -35,7 +35,7 @@ Re-run in full after the DB password rotation (see below) with identical results
 
 ## Known discrepancies (not bugs, just noted)
 
-- Seed produces **23** media items; an earlier expectation assumed 22. The seed script's own `mediaSeeds` array has 23 entries — this is simply what's in [`src/db/seed.ts`](../src/db/seed.ts), not a defect.
+- Seed produces **23** media items; an earlier expectation (from outside this repo) assumed 22. Investigated directly: [`seed.ts`](../src/db/seed.ts)'s `mediaSeeds` array has exactly 23 hand-written entries, no duplicate `filename`/`url` values, no off-by-one in the insert loop. The README never actually stated a media count anywhere, so there was no incorrect value in the repo to fix — added a seeded-record-count table to the README instead so this can't recur.
 - Repo's JWT env vars are `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`, not `JWT_SECRET`.
 - Admin/editor/category/user/content routes live under `/api/admin/...`, not bare `/categories` or `/users`.
 
