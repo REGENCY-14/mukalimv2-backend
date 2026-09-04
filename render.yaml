@@ -1,0 +1,57 @@
+# Render Blueprint — see https://render.com/docs/blueprint-spec
+#
+# This is optional: the repo deploys fine through Render's plain "New Web
+# Service" wizard without it (Node runtime, `npm ci && npm run build` /
+# `npm start` are auto-detected from package.json). This file just makes
+# that config reproducible/reviewable in git instead of only living in the
+# dashboard, and documents every env var the service needs.
+#
+# Secret values are intentionally NOT set here (sync: false) — Render will
+# prompt for them once when you create the service from this Blueprint, or
+# you enter them by hand in Settings → Environment if you set the service
+# up through the plain wizard instead. See docs/render-deploy.md for the
+# full manual dashboard checklist.
+services:
+  - type: web
+    name: mukalimv2-backend
+    runtime: node
+    plan: starter
+    region: frankfurt # closest Render region to the eu-north-1 Supabase project; change if needed
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    # Runs after a successful build, before traffic is switched to the new
+    # deploy. Commented out by default — see docs/render-deploy.md for why
+    # this needs a deliberate one-time decision rather than being turned on
+    # blindly (it also runs on every subsequent deploy, and drizzle-orm's
+    # migrator is safe to re-run since already-applied migrations are
+    # skipped, but a *first* production migration should be run and watched
+    # manually, not enabled here).
+    # preDeployCommand: npm run db:migrate
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: CORS_ORIGINS
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "10"
+      - key: SEED_DEMO_PASSWORD
+        sync: false
+      # PORT is injected automatically by Render — do not set it.
+      # COOKIE_DOMAIN is intentionally omitted — see docs/render-deploy.md;
+      # setting it in production (frontend and backend on different
+      # domains) will break auth.

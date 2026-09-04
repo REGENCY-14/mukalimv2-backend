@@ -6,6 +6,12 @@ const REFRESH_COOKIE = "mukalim_refresh";
 const isProd = process.env.NODE_ENV === "production";
 const secure = process.env.COOKIE_SECURE === "true" || isProd;
 const domain = process.env.COOKIE_DOMAIN || undefined;
+// Frontend (Vercel) and backend (Render) live on different domains in
+// production, so the cookie is cross-site from the browser's point of view —
+// that requires SameSite=None, which browsers only honor when Secure is
+// also set (guaranteed above: isProd implies secure=true). Local dev keeps
+// Lax since frontend/backend are both on localhost there.
+const sameSite = isProd ? ("none" as const) : ("lax" as const);
 
 function accessMaxAgeMs(): number {
   return 15 * 60 * 1000; // matches JWT_ACCESS_EXPIRES_IN default (15m); token itself is the source of truth
@@ -19,7 +25,7 @@ export function setAuthCookies(res: Response, accessToken: string, refreshToken:
   res.cookie(ACCESS_COOKIE, accessToken, {
     httpOnly: true,
     secure,
-    sameSite: "lax",
+    sameSite,
     domain,
     maxAge: accessMaxAgeMs(),
     path: "/",
@@ -27,7 +33,7 @@ export function setAuthCookies(res: Response, accessToken: string, refreshToken:
   res.cookie(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
     secure,
-    sameSite: "lax",
+    sameSite,
     domain,
     maxAge: refreshMaxAgeMs(),
     path: "/api/auth",
