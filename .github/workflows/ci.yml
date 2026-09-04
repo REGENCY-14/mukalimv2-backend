@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Type-check, migration drift, tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run lint
+
+      - name: Check for schema/migration drift
+        # drizzle-kit generate reads the TS schema files and local migration
+        # snapshots only — it never opens a connection for `generate`, but
+        # drizzle.config.ts requires DATABASE_URL to be *set* (not reachable)
+        # just to load, so a placeholder value is enough here.
+        env:
+          DATABASE_URL: postgres://ci:ci@localhost:5432/ci
+        run: |
+          npx drizzle-kit generate
+          if [ -n "$(git status --porcelain drizzle)" ]; then
+            echo "::error::drizzle-kit generate produced changes under drizzle/ that aren't committed."
+            echo "Run 'npm run db:generate' locally after a schema change and commit the result."
+            git status --porcelain drizzle
+            git diff drizzle
+            exit 1
+          fi
+
+      - name: Run tests
+        run: npm test --if-present
