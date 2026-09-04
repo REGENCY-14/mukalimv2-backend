@@ -159,6 +159,29 @@ export async function remove(id: string, actor: Actor) {
   const [existing] = await db.select().from(media).where(eq(media.id, id)).limit(1);
   if (!existing) throw AppError.notFound("Media item not found.");
 
+  // Mirrors categoryService.remove's block-on-referenced-content check, just
+  // matching on the stored URL string instead of a foreign key — there is
+  // no FK from categories/content_items to media (see attachUsage above),
+  // only these three plain-text URL columns across the whole schema.
+  const [categoryRefs, contentRefs] = await Promise.all([
+    db
+      .select({ slug: categories.slug })
+      .from(categories)
+      .where(or(eq(categories.iconUrl, existing.url), eq(categories.heroImageUrl, existing.url))),
+    db.select({ slug: contentItems.slug }).from(contentItems).where(eq(contentItems.featuredImageUrl, existing.url)),
+  ]);
+
+  if (categoryRefs.length > 0 || contentRefs.length > 0) {
+    const parts: string[] = [];
+    if (categoryRefs.length > 0) {
+      parts.push(`category ${categoryRefs.map((c) => `'${c.slug}'`).join(", ")}`);
+    }
+    if (contentRefs.length > 0) {
+      parts.push(`content ${contentRefs.map((c) => `'${c.slug}'`).join(", ")}`);
+    }
+    throw AppError.conflict(`Cannot delete '${existing.filename}' — referenced by ${parts.join(" and ")}.`);
+  }
+
   await db.delete(media).where(eq(media.id, id));
 
   // Best-effort local-disk cleanup — a no-op once storage is swapped to S3.
