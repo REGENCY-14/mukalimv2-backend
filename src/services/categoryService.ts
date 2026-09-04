@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import { categories, categoryTranslations, contentItems } from "../db/schema";
 import { emptyLocalizedText, type LocalizedText, type PublicLocale } from "../types/localized";
@@ -42,11 +42,11 @@ async function attachTranslationsAndCount(rows: (typeof categories.$inferSelect)
     db
       .select({ categoryId: categoryTranslations.categoryId, locale: categoryTranslations.locale, name: categoryTranslations.name, description: categoryTranslations.description, heroImageAlt: categoryTranslations.heroImageAlt })
       .from(categoryTranslations)
-      .where(sql`${categoryTranslations.categoryId} = ANY(${ids})`),
+      .where(inArray(categoryTranslations.categoryId, ids)),
     db
       .select({ categoryId: contentItems.categoryId, count: sql<number>`count(*)::int` })
       .from(contentItems)
-      .where(sql`${contentItems.categoryId} = ANY(${ids})`)
+      .where(inArray(contentItems.categoryId, ids))
       .groupBy(contentItems.categoryId),
   ]);
 
