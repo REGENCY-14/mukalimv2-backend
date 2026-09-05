@@ -50,8 +50,10 @@ services:
         sync: false
       - key: COOKIE_SECURE
         value: "true"
-      - key: UPLOAD_DIR
-        value: uploads
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
       - key: MAX_UPLOAD_SIZE_MB
         value: "10"
       - key: SEED_DEMO_PASSWORD

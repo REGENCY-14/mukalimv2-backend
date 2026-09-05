@@ -1,5 +1,4 @@
 import "dotenv/config";
-import path from "node:path";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -8,7 +7,6 @@ import routes from "./routes";
 import { attachUser } from "./middleware/auth";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFoundHandler } from "./middleware/notFound";
-import { UPLOAD_DIR } from "./middleware/upload";
 
 const app = express();
 
@@ -31,9 +29,6 @@ app.use(
 );
 app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
-
-// Locally-stored media — swap for a CDN/S3 URL once real object storage is wired in.
-app.use("/uploads", express.static(path.resolve(process.cwd(), UPLOAD_DIR)));
 
 app.get("/health", (_req, res) => res.status(200).json({ status: "ok" }));
 

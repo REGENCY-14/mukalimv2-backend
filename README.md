@@ -54,7 +54,8 @@ src/
    | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | ≥32-char random secrets |
    | `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | token lifetimes |
    | `COOKIE_DOMAIN` / `COOKIE_SECURE` | cookie flags — set `COOKIE_SECURE=true` in production (HTTPS) |
-   | `UPLOAD_DIR` / `MAX_UPLOAD_SIZE_MB` | local media storage (dev) |
+   | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Supabase Storage for media uploads (same project as `DATABASE_URL`) |
+   | `MAX_UPLOAD_SIZE_MB` | max upload size per file |
    | `SEED_DEMO_PASSWORD` | password set on every seeded demo user |
 
 3. **Create the database** (any local Postgres works)
@@ -185,11 +186,15 @@ to this shape automatically (`src/middleware/errorHandler.ts`).
 
 ## File storage
 
-Uploads land on local disk under `UPLOAD_DIR` (served at `/uploads/*`) in
-dev. `src/services/mediaService.ts` only ever deals in a `url` string, so
-swapping in S3-compatible storage later means replacing
-`src/middleware/upload.ts`'s disk storage + `mediaService.remove`'s
-`fs.unlink` — nothing else in the codebase assumes local disk.
+Uploads go to a Supabase Storage bucket (`media`, public — see
+`drizzle/0003_create_media_storage_bucket.sql`), not local disk — Render's
+standard web service filesystem is ephemeral, so local disk doesn't survive
+a redeploy or a free-tier instance restart. `src/middleware/upload.ts` holds
+files in memory (`multer.memoryStorage()`) just long enough to hand them to
+`src/utils/storage.ts`, which uploads via the Supabase service-role client
+and returns a public URL; `src/services/mediaService.ts` only ever deals in
+that `url` string, same as always. Requires `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` (see the env var table above).
 
 ## Known gaps vs. a full production build
 
