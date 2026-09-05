@@ -3,6 +3,7 @@ import sharp from "sharp";
 import * as mediaService from "../services/mediaService";
 import { asyncHandler } from "../utils/asyncHandler";
 import { AppError } from "../utils/errors";
+import { uploadFile } from "../utils/storage";
 
 export const list = asyncHandler(async (req: Request, res: Response) => {
   const result = await mediaService.list(req.query as Record<string, unknown>);
@@ -14,22 +15,23 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
   const files = (req.files as Express.Multer.File[]) || [];
   if (files.length === 0) throw AppError.badRequest("No files were uploaded — send them under the 'files' field.");
 
-  const withDimensions = await Promise.all(
+  const uploaded = await Promise.all(
     files.map(async (file) => {
       // width/height are read server-side from the file, not trusted from
       // the client (see MediaUploadZone.tsx's client-only readImageDimensions).
       let width = 0;
       let height = 0;
       try {
-        const meta = await sharp(file.path).metadata();
+        const meta = await sharp(file.buffer).metadata();
         width = meta.width ?? 0;
         height = meta.height ?? 0;
       } catch {
         // SVGs and a few odd formats may not report dimensions — non-fatal.
       }
+      const url = await uploadFile(file.originalname, file.buffer, file.mimetype);
       return {
         filename: file.originalname,
-        storedFilename: file.filename,
+        url,
         sizeKb: Math.round(file.size / 1024),
         width,
         height,
@@ -37,7 +39,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }),
   );
 
-  const created = await mediaService.create(withDimensions, { id: req.user.id, role: req.user.role });
+  const created = await mediaService.create(uploaded, { id: req.user.id, role: req.user.role });
   res.status(201).json({ data: created });
 });
 

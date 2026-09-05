@@ -57,18 +57,29 @@ changes for services created via the manual wizard.
   correct — `build` runs `tsc`, `start` runs the compiled
   `dist/server.js` (not `tsx`/`ts-node`) — no change needed.
 
-## ⚠️ Not fixed — flagging for you
+## Media uploads — now on Supabase Storage, not local disk
 
-**Media uploads won't survive a deploy.** [`upload.ts`](../src/middleware/upload.ts)
-writes files to local disk (`multer.diskStorage`). Render's standard web
-service filesystem is ephemeral — every deploy, restart, or scale event
-gets a fresh disk, so anything in `uploads/` is gone. Options, in rough
-order of effort: attach a [Render Persistent
-Disk](https://render.com/docs/disks) (works, but doesn't survive across
-multiple instances if you ever scale horizontally), or wire up real object
-storage (S3/R2/Supabase Storage — `mediaService.ts`'s own comments already
-flag this as a pre-production TODO). Not touched here since it's a real
-architecture decision, not a config fix.
+Originally flagged as a real problem here (Render's standard web service
+filesystem is ephemeral — uploads written to local disk didn't survive a
+redeploy or a free-tier instance spin-down) and confirmed live: an uploaded
+file was fetchable immediately, then gone after the instance restarted.
+
+Fixed by moving uploads to a Supabase Storage bucket (`media`, public —
+[`drizzle/0003_create_media_storage_bucket.sql`](../drizzle/0003_create_media_storage_bucket.sql))
+instead of local disk. `src/middleware/upload.ts` now holds files in memory
+just long enough to hand them to `src/utils/storage.ts`, which uploads them
+via the Supabase service-role client and returns a public URL — no code
+path touches the filesystem anymore. Requires `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` (see the checklist below).
+
+Verified against the live bucket: uploaded a test file, confirmed it's
+fetchable at its public URL, deleted it via the API, confirmed the
+`storage.objects` row is gone. One thing that looks odd but isn't a bug:
+right after a delete, the public URL can still return the old file's `200`
+for up to an hour — that's Cloudflare's edge CDN in front of Supabase
+Storage serving a cached copy (`Cache-Control: public, max-age=3600`), not
+the object actually still existing. The DB row and the underlying storage
+object are both gone immediately; only the CDN's cached response lags.
 
 ## Environment variable checklist (Render dashboard → Environment)
 
@@ -83,7 +94,8 @@ architecture decision, not a config fix.
 | `CORS_ORIGINS` | your Vercel frontend's exact URL(s), comma-separated | e.g. `https://mukalim-v2.vercel.app` — add a preview-deployment domain too if you need CORS to work on Vercel previews, not just production. |
 | `COOKIE_SECURE` | `true` | Belt-and-suspenders — `NODE_ENV=production` already forces this, but set it explicitly. |
 | `COOKIE_DOMAIN` | **leave unset** | Do not set this to `localhost` or anything else in production. Frontend (`*.vercel.app`) and backend (`*.onrender.com`) are unrelated domains, not subdomains of a shared parent — an explicit `domain` here will make the browser reject the cookie entirely. Leaving it unset scopes the cookie to the backend's own host, which is what you want. |
-| `UPLOAD_DIR` | `uploads` | Only matters if you attach a persistent disk; see the flag above. |
+| `SUPABASE_URL` | your Supabase project URL, e.g. `https://bitomyqwngxdpbyrutrj.supabase.co` | Same project as `DATABASE_URL`. |
+| `SUPABASE_SERVICE_ROLE_KEY` | the **service_role** secret key | Dashboard → Project Settings → API. Bypasses RLS entirely — handle like `DATABASE_URL`/JWT secrets, never expose to a client. |
 | `MAX_UPLOAD_SIZE_MB` | `10` | Optional, this is the code's default. |
 | `SEED_DEMO_PASSWORD` | only if you plan to run `db:seed` against production | Skip this entirely if you're not seeding demo data in production (you almost certainly shouldn't). |
 

@@ -1,12 +1,10 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { categories, contentItems, media, mediaTranslations } from "../db/schema";
 import { emptyLocalizedText, type LocalizedText } from "../types/localized";
 import { parsePageParams, buildMeta } from "../utils/pagination";
 import { AppError } from "../utils/errors";
-import { UPLOAD_DIR } from "../middleware/upload";
+import { deleteFile } from "../utils/storage";
 import type { UpdateAltTextInput } from "../schemas/media";
 import type { Actor } from "./activityService";
 import * as activityService from "./activityService";
@@ -105,7 +103,7 @@ export async function list(query: Record<string, unknown>) {
 
 export interface UploadedFile {
   filename: string;
-  storedFilename: string;
+  url: string;
   sizeKb: number;
   width: number;
   height: number;
@@ -118,7 +116,7 @@ export async function create(files: UploadedFile[], actor: Actor) {
       .insert(media)
       .values({
         filename: file.filename,
-        url: `/uploads/${file.storedFilename}`,
+        url: file.url,
         sizeKb: file.sizeKb,
         width: file.width,
         height: file.height,
@@ -184,11 +182,10 @@ export async function remove(id: string, actor: Actor) {
 
   await db.delete(media).where(eq(media.id, id));
 
-  // Best-effort local-disk cleanup — a no-op once storage is swapped to S3.
-  if (existing.url.startsWith("/uploads/")) {
-    const filePath = path.join(UPLOAD_DIR, path.basename(existing.url));
-    await fs.unlink(filePath).catch(() => undefined);
-  }
+  // Best-effort cleanup in Supabase Storage — a no-op for seed-data rows
+  // whose URL points at the frontend's static assets rather than something
+  // this backend ever uploaded (see isManagedUrl in utils/storage.ts).
+  await deleteFile(existing.url);
 
   await activityService.log(actor, "removed", `'${existing.filename}'`);
 }
