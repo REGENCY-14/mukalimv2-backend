@@ -56,6 +56,7 @@ src/
    | `COOKIE_DOMAIN` / `COOKIE_SECURE` | cookie flags — set `COOKIE_SECURE=true` in production (HTTPS) |
    | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Supabase Storage for media uploads (same project as `DATABASE_URL`) |
    | `MAX_UPLOAD_SIZE_MB` | max upload size per file |
+   | `RESEND_API_KEY` / `INVITE_EMAIL_FROM` / `FRONTEND_URL` | invite emails (optional — falls back to returning the raw token if unset) |
    | `SEED_DEMO_PASSWORD` | password set on every seeded demo user |
 
 3. **Create the database** (any local Postgres works)
@@ -117,11 +118,15 @@ src/
   client-side. Add a `token_version` column + check before shipping this to
   production if you need "log out everywhere" or forced revocation.
 - The invite flow (`POST /api/admin/users`, aliased at `POST /api/auth/invite`)
-  creates a `status: "invited"` user and returns a one-time `inviteToken`
-  directly in the response — there's no email provider wired up in this
-  scaffold. `POST /api/auth/accept-invite` exchanges that token + a chosen
-  password to activate the account. Wire the token into a real invite email
-  before shipping.
+  takes just `email` + `role` (`name` is optional — derived from the email's
+  local part if omitted, e.g. `amara.osei@...` → "Amara Osei"; correctable
+  later via `PATCH /api/admin/users/:id`). It creates a `status: "invited"`
+  user and emails them an accept-invite link via Resend
+  (`src/utils/email.ts`) — see `RESEND_API_KEY`/`INVITE_EMAIL_FROM`/
+  `FRONTEND_URL` above. If Resend isn't configured or the send fails, the
+  response falls back to `{ emailSent: false, inviteToken }` so the admin
+  can deliver the link manually instead. `POST /api/auth/accept-invite`
+  exchanges that token + a chosen password to activate the account.
 - The frontend's "preview as" role switcher (`Topbar.tsx`) is a dev-only UI
   affordance with no server counterpart here by design — see the note in
   `docs/API_ENDPOINTS.md`.
@@ -199,7 +204,6 @@ that `url` string, same as always. Requires `SUPABASE_URL` and
 ## Known gaps vs. a full production build
 
 - No refresh-token revocation list (see Auth notes above).
-- No transactional email (invite tokens are returned directly, not emailed).
 - `category_id`/`content_id` deletes are hard deletes, no soft-delete/trash.
 - CORS/cookie config assumes the API and frontend are on different origins
   behind HTTPS in production — double-check `COOKIE_SECURE`, `COOKIE_DOMAIN`,

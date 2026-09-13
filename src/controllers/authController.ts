@@ -52,10 +52,10 @@ export const acceptInvite = asyncHandler(async (req: Request, res: Response) => 
 export const invite = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthenticated();
   const input = inviteUserSchema.parse(req.body);
-  const { user, inviteToken } = await userService.invite(input, { id: req.user.id, role: req.user.role });
+  const { user, emailSent, inviteToken } = await userService.invite(input, { id: req.user.id, role: req.user.role });
 
-  // No mail integration in this scaffold — the token is returned directly
-  // so the frontend/dev can complete the accept-invite flow manually. Wire
-  // this to an email provider before shipping to production.
-  res.status(201).json({ user, inviteToken });
+  // inviteToken is only present when emailSent is false (Resend not
+  // configured, or the send failed) — a fallback so the admin can still
+  // deliver the link manually. See userService.invite / utils/email.ts.
+  res.status(201).json({ user, emailSent, inviteToken });
 });

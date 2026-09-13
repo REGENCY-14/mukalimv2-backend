@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 export const inviteUserSchema = z.object({
-  name: z.string().min(1),
+  // Optional — invites can be sent with just an email; a placeholder name is
+  // derived from the address (see userService.deriveNameFromEmail) and can
+  // be corrected later via PATCH /api/admin/users/:id.
+  name: z.string().min(1).optional(),
   email: z.string().email(),
   role: z.enum(["admin", "editor", "viewer"]),
 });

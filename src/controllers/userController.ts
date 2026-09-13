@@ -10,8 +10,8 @@ export const list = asyncHandler(async (_req: Request, res: Response) => {
 
 export const invite = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthenticated();
-  const { user, inviteToken } = await userService.invite(req.body, { id: req.user.id, role: req.user.role });
-  res.status(201).json({ user, inviteToken });
+  const { user, emailSent, inviteToken } = await userService.invite(req.body, { id: req.user.id, role: req.user.role });
+  res.status(201).json({ user, emailSent, inviteToken });
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {

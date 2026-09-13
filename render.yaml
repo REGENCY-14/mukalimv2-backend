@@ -56,6 +56,12 @@ services:
         sync: false
       - key: MAX_UPLOAD_SIZE_MB
         value: "10"
+      - key: RESEND_API_KEY
+        sync: false
+      - key: INVITE_EMAIL_FROM
+        value: "Mukalim <onboarding@resend.dev>"
+      - key: FRONTEND_URL
+        value: https://mukalim-v2.vercel.app
       - key: SEED_DEMO_PASSWORD
         sync: false
       # PORT is injected automatically by Render — do not set it.

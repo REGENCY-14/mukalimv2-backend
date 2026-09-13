@@ -5,6 +5,7 @@ import { users } from "../db/schema";
 import { AppError } from "../utils/errors";
 import { hashPassword } from "../utils/password";
 import { countOf } from "../utils/rows";
+import { sendInviteEmail } from "../utils/email";
 import type { InviteUserInput, UpdateUserInput } from "../schemas/user";
 import type { Actor } from "./activityService";
 import * as activityService from "./activityService";
@@ -14,6 +15,20 @@ const AVATAR_COLORS = ["bg-brand-gold", "bg-brand-brown", "bg-admin-terracotta",
 
 function pickAvatarColor(): string {
   return AVATAR_COLORS[crypto.randomInt(AVATAR_COLORS.length)] as string;
+}
+
+/** Invites can be sent with just an email — this derives a readable
+ * placeholder name from the local part (e.g. "amara.osei" -> "Amara Osei")
+ * for invites that don't include one. Correctable later via PATCH
+ * /api/admin/users/:id. */
+export function deriveNameFromEmail(email: string): string {
+  const local = email.split("@")[0] ?? email;
+  const words = local
+    .replace(/[._-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1));
+  return words.join(" ") || "New User";
 }
 
 function toPublic(row: typeof users.$inferSelect) {
@@ -31,6 +46,8 @@ export async function invite(input: InviteUserInput, actor: Actor) {
   const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
   if (existing) throw AppError.conflict("A user with this email already exists.");
 
+  const name = input.name?.trim() || deriveNameFromEmail(email);
+
   // No password yet — set on accept-invite. A random, never-returned hash
   // is stored as a placeholder so the NOT NULL column is satisfiable.
   const placeholderHash = await hashPassword(crypto.randomBytes(24).toString("hex"));
@@ -38,7 +55,7 @@ export async function invite(input: InviteUserInput, actor: Actor) {
   const [row] = await db
     .insert(users)
     .values({
-      name: input.name,
+      name,
       email,
       passwordHash: placeholderHash,
       role: input.role,
@@ -49,12 +66,22 @@ export async function invite(input: InviteUserInput, actor: Actor) {
   if (!row) throw new AppError(500, "INTERNAL_ERROR", "Failed to create user.");
 
   const inviteToken = await authService.issueInviteToken(row.id);
-  await activityService.log(actor, "invited", `'${input.name}' (${input.role})`);
+  await activityService.log(actor, "invited", `'${name}' (${input.role})`);
 
-  // The caller (controller) decides how to deliver inviteToken — email in a
-  // real deployment; returned directly here since there's no mail
-  // integration in this scaffold (see README's "Auth notes").
-  return { user: toPublic(row), inviteToken };
+  // Actually email the invite link. If Resend isn't configured or the send
+  // fails for any reason, don't fail the whole invite — the user row and
+  // token already exist — fall back to returning the raw token so the
+  // caller (admin) can still deliver it manually.
+  let emailSent = false;
+  try {
+    const messageId = await sendInviteEmail(email, name, inviteToken);
+    emailSent = true;
+    console.log(`[userService.invite] Invite email sent to ${email} (Resend message id: ${messageId})`);
+  } catch (err) {
+    console.error(`[userService.invite] Failed to send invite email to ${email}:`, err);
+  }
+
+  return { user: toPublic(row), emailSent, inviteToken: emailSent ? undefined : inviteToken };
 }
 
 export async function update(id: string, input: UpdateUserInput, actor: Actor) {
