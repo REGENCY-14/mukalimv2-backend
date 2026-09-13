@@ -74,7 +74,7 @@ export async function invite(input: InviteUserInput, actor: Actor) {
   // caller (admin) can still deliver it manually.
   let emailSent = false;
   try {
-    const messageId = await sendInviteEmail(email, name, inviteToken);
+    const messageId = await sendInviteEmail(email, name, inviteToken, input.role);
     emailSent = true;
     console.log(`[userService.invite] Invite email sent to ${email} (Resend message id: ${messageId})`);
   } catch (err) {
