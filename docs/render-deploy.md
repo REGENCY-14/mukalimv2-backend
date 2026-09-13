@@ -97,6 +97,9 @@ object are both gone immediately; only the CDN's cached response lags.
 | `SUPABASE_URL` | your Supabase project URL, e.g. `https://bitomyqwngxdpbyrutrj.supabase.co` | Same project as `DATABASE_URL`. |
 | `SUPABASE_SERVICE_ROLE_KEY` | the **service_role** secret key | Dashboard → Project Settings → API. Bypasses RLS entirely — handle like `DATABASE_URL`/JWT secrets, never expose to a client. |
 | `MAX_UPLOAD_SIZE_MB` | `10` | Optional, this is the code's default. |
+| `RESEND_API_KEY` | your Resend API key | Dashboard → API Keys at resend.com. Used to email invite links (`POST /api/admin/users`). If unset, invites still work but fall back to returning the raw `inviteToken` in the API response for manual delivery. |
+| `INVITE_EMAIL_FROM` | `Mukalim <onboarding@resend.dev>` | Optional, this is the code's default — works immediately with no domain setup. Switch to your own verified sending domain later if you want a branded "from" address. |
+| `FRONTEND_URL` | `https://mukalim-v2.vercel.app` | Used to build the invite link (`${FRONTEND_URL}/accept-invite?token=...`) — point this at wherever the frontend's accept-invite page actually lives. |
 | `SEED_DEMO_PASSWORD` | only if you plan to run `db:seed` against production | Skip this entirely if you're not seeding demo data in production (you almost certainly shouldn't). |
 
 **Do not set `PORT`** — Render assigns it dynamically and injects it as an
