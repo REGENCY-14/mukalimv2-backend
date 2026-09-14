@@ -8,12 +8,12 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must both be set — copy .env.example and fill them in.");
+  throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must both be set, copy .env.example and fill them in.");
 }
 
 // Service-role client: bypasses storage RLS entirely, same trust level as
 // this app's own "postgres" Postgres connection (see drizzle/0001_enable_rls.sql).
-// Never expose this key to a client — it's server-only, same handling as
+// Never expose this key to a client, it's server-only, same handling as
 // DATABASE_URL/JWT secrets.
 const bucket = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -38,7 +38,7 @@ export function isManagedUrl(url: string): boolean {
   return url.includes(PUBLIC_URL_MARKER);
 }
 
-/** Best-effort delete — safe to call on any URL; no-ops on ones this app
+/** Best-effort delete, safe to call on any URL; no-ops on ones this app
  * doesn't manage (see isManagedUrl) or that are already gone. */
 export async function deleteFile(url: string): Promise<void> {
   if (!isManagedUrl(url)) return;

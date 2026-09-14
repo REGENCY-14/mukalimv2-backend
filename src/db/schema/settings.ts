@@ -1,7 +1,7 @@
 import { pgTable, smallint, text, timestamp } from "drizzle-orm/pg-core";
 import { localeEnum } from "./enums";
 
-// Singleton — exactly one row, pinned to id = 1 (see seed.ts / settingsService.ts).
+// Singleton, exactly one row, pinned to id = 1 (see seed.ts / settingsService.ts).
 export const settings = pgTable("settings", {
   id: smallint("id").primaryKey().default(1),
   siteName: text("site_name").notNull().default("MUKALIM"),

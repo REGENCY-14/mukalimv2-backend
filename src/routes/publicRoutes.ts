@@ -7,7 +7,7 @@ import { listArticlesQuerySchema, localeQuerySchema } from "../schemas/publicCon
 const router = Router();
 
 // Every route here must only ever surface published content in active
-// categories — enforced in the service layer, not just by these routes.
+// categories, enforced in the service layer, not just by these routes.
 router.get("/categories", validate({ query: localeQuerySchema }), categoryController.listPublic);
 router.get("/categories/:slug", validate({ query: localeQuerySchema }), categoryController.getPublic);
 router.get("/categories/:slug/articles", validate({ query: listArticlesQuerySchema }), contentController.listPublicArticles);

@@ -27,7 +27,7 @@ export const attachUser = asyncHandler(async (req: Request, _res: Response, next
       req.user = authUser;
     }
   } catch {
-    // Invalid/expired token — treat as unauthenticated, let requireAuth (if any) reject it.
+    // Invalid/expired token, treat as unauthenticated, let requireAuth (if any) reject it.
   }
   next();
 });

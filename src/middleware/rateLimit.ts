@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 
-// Applied to /api/auth/* only — protects login/refresh from brute-force.
+// Applied to /api/auth/* only, protects login/refresh from brute-force.
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,

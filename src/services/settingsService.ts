@@ -10,7 +10,7 @@ const SETTINGS_ID = 1;
 
 export async function get() {
   const [row] = await db.select().from(settings).where(eq(settings.id, SETTINGS_ID)).limit(1);
-  if (!row) throw new AppError(500, "INTERNAL_ERROR", "Settings row is missing — did you run db:seed?");
+  if (!row) throw new AppError(500, "INTERNAL_ERROR", "Settings row is missing, did you run db:seed?");
   return row;
 }
 

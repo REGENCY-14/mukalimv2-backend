@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../utils/errors";
 
-// Centralized error handler — every error path (thrown AppError, Zod
+// Centralized error handler, every error path (thrown AppError, Zod
 // validation, unexpected exceptions) resolves to the same JSON shape:
 // { "error": { "code": "...", "message": "...", "details"?: ... } }
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {

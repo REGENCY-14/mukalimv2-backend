@@ -5,7 +5,7 @@ import { users } from "./users";
 export const media = pgTable("media", {
   id: uuid("id").primaryKey().defaultRandom(),
   filename: text("filename").notNull(),
-  // Wherever the file actually lives — local /uploads path in dev, or an
+  // Wherever the file actually lives, local /uploads path in dev, or an
   // S3-compatible URL once that's swapped in (see src/utils/storage.ts).
   url: text("url").notNull(),
   sizeKb: integer("size_kb").notNull(),

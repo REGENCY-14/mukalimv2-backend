@@ -2,7 +2,7 @@ import { z } from "zod";
 import { sanitizePlainText } from "../utils/sanitize";
 
 export const inviteUserSchema = z.object({
-  // Optional — invites can be sent with just an email; a placeholder name is
+  // Optional, invites can be sent with just an email; a placeholder name is
   // derived from the address (see userService.deriveNameFromEmail) and can
   // be corrected later via PATCH /api/admin/users/:id.
   name: z.string().min(1).transform(sanitizePlainText).optional(),

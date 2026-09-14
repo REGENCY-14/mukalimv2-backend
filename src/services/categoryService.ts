@@ -25,7 +25,7 @@ async function ensureUniqueSlug(desired: string, excludeId?: string): Promise<st
   let candidate = desired || "category";
   let suffix = 1;
   // Keep the same auto-suffix behavior slugify()-adjacent code in the
-  // frontend expects when a name collides — try "-2", "-3", ...
+  // frontend expects when a name collides, try "-2", "-3", ...
   for (;;) {
     const [existing] = await db.select({ id: categories.id }).from(categories).where(eq(categories.slug, candidate)).limit(1);
     if (!existing || existing.id === excludeId) return candidate;
@@ -176,7 +176,7 @@ export async function remove(id: string, actor: Actor) {
   const count = countOf(countRows);
   if (count > 0) {
     throw AppError.conflict(
-      `Cannot delete '${existing.slug}' — ${count} content item(s) still reference it. Reassign or delete them first.`,
+      `Cannot delete '${existing.slug}', ${count} content item(s) still reference it. Reassign or delete them first.`,
     );
   }
 
@@ -218,7 +218,7 @@ export async function getPublic(slug: string, locale: PublicLocale) {
   };
 }
 
-/** Internal helper for contentService — resolves a category row by id without the public/active filter. */
+/** Internal helper for contentService, resolves a category row by id without the public/active filter. */
 export async function requireCategoryRow(id: string) {
   const [row] = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
   if (!row) throw AppError.badRequest("categoryId does not reference an existing category.");

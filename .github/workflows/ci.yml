@@ -24,7 +24,7 @@ jobs:
 
       - name: Check for schema/migration drift
         # drizzle-kit generate reads the TS schema files and local migration
-        # snapshots only — it never opens a connection for `generate`, but
+        # snapshots only, it never opens a connection for `generate`, but
         # drizzle.config.ts requires DATABASE_URL to be *set* (not reachable)
         # just to load, so a placeholder value is enough here.
         env:

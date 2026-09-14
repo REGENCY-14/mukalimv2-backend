@@ -12,10 +12,10 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 
-// Public site — unauthenticated, published content only.
+// Public site, unauthenticated, published content only.
 router.use("/", publicRoutes);
 
-// Admin dashboard — every route requires a session (enforced inside each router).
+// Admin dashboard, every route requires a session (enforced inside each router).
 router.use("/admin/categories", adminCategoryRoutes);
 router.use("/admin/content", adminContentRoutes);
 router.use("/admin/media", adminMediaRoutes);

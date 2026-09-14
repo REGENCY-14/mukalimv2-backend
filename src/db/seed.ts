@@ -16,8 +16,8 @@ import type { Locale } from "../types/localized";
 
 /**
  * Demo data matching what's currently mocked in the frontend
- * (src/lib/admin/mockData.ts + src/lib/categories.ts) — same category
- * names, sample content, sample users across the three roles — so the
+ * (src/lib/admin/mockData.ts + src/lib/categories.ts), same category
+ * names, sample content, sample users across the three roles, so the
  * frontend can be pointed at this API with minimal changes.
  *
  * Re-runnable: truncates every table it seeds first.
@@ -186,9 +186,9 @@ async function main() {
         "Découvrez pourquoi le gel de cette plante succulente est prisé depuis des siècles comme base rafraîchissante et réparatrice pour les peaux sensibles.",
         [
           "Aloe vera has been cultivated for its skin-soothing properties since antiquity, prized across Egyptian, Greek, and Indian traditions alike as a first response to sun-exposed or irritated skin.",
-          "The gel drawn from its thick, fleshy leaves is rich in polysaccharides and vitamins that help skin retain moisture without leaving a heavy residue — a quality that makes it an unusually versatile base for both leave-on treatments and rinse-off masks.",
+          "The gel drawn from its thick, fleshy leaves is rich in polysaccharides and vitamins that help skin retain moisture without leaving a heavy residue, a quality that makes it an unusually versatile base for both leave-on treatments and rinse-off masks.",
           "In our formulations, we source aloe from growers who harvest by hand at peak maturity, when the gel's cooling compounds are most concentrated, then cold-process it to preserve its natural enzymes.",
-          "The result is a botanical base that calms as effectively as it hydrates — the reason it remains, centuries on, one of skincare's most trusted ingredients.",
+          "The result is a botanical base that calms as effectively as it hydrates, the reason it remains, centuries on, one of skincare's most trusted ingredients.",
         ].join("\n\n"),
         "",
         "",
@@ -222,7 +222,7 @@ async function main() {
           "Native to Australia and now grown across temperate climates worldwide, eucalyptus has long been valued for the crisp, camphoraceous oil held within its silvery leaves.",
           "That oil carries natural clarifying properties, making it a favorite in formulations designed to invigorate tired skin and cut through congestion without stripping the skin's natural barrier.",
           "We steam-distill our eucalyptus leaf in small batches to capture its essential oil at full potency, then blend it at concentrations gentle enough for daily use.",
-          "A few drops go a long way — the reason a single branch of eucalyptus can scent an entire formulation with its unmistakable, purifying freshness.",
+          "A few drops go a long way, the reason a single branch of eucalyptus can scent an entire formulation with its unmistakable, purifying freshness.",
         ].join("\n\n"),
         "",
         "",
@@ -254,7 +254,7 @@ async function main() {
         "Explorez l'usage séculaire de la lavande séchée dans les baumes apaisants, et pourquoi son parfum reste un incontournable des soins réparateurs.",
         [
           "Dried lavender has anchored calming rituals for centuries, from Roman bathhouses to modern apothecaries, prized as much for its fragrance as for its gentle effect on stressed, reactive skin.",
-          "The flower's essential oil contains linalool and linalyl acetate, compounds studied for their soothing properties — part of why lavender remains a staple in formulations meant to unwind the skin as much as the mind.",
+          "The flower's essential oil contains linalool and linalyl acetate, compounds studied for their soothing properties, part of why lavender remains a staple in formulations meant to unwind the skin as much as the mind.",
           "We harvest our lavender at the height of bloom, when its oil content peaks, then dry the bundles slowly to preserve both color and scent.",
           "The result is a botanical that does double duty: a calming active for the skin, and a ritual in itself each time the jar is opened.",
         ].join("\n\n"),
@@ -287,7 +287,7 @@ async function main() {
       body: lt(
         "Comprenez comment les surfaces et outils partagés peuvent compromettre la pureté, et les protocoles que nous suivons pour garder chaque ingrédient isolé et propre.",
         [
-          "Cross-contamination rarely announces itself — a shared cutting board, an unwashed scoop, a storage bin reused between batches — yet it's one of the most common ways purity is compromised before a product ever reaches the shelf.",
+          "Cross-contamination rarely announces itself, a shared cutting board, an unwashed scoop, a storage bin reused between batches, yet it's one of the most common ways purity is compromised before a product ever reaches the shelf.",
           "Our facilities separate ingredient families at every stage of handling, from intake through packaging, with dedicated tools and surfaces for each category we process.",
           "Staff follow color-coded protocols that make cross-use immediately visible to anyone on the floor, turning a risk that's usually invisible into one that's easy to catch.",
           "It's unglamorous work, but it's the foundation every other quality claim we make depends on.",
@@ -321,7 +321,7 @@ async function main() {
       body: lt(
         "Découvrez comment un stockage constant et contrôlé préserve la puissance des ingrédients et prévient leur détérioration, de la récolte jusqu'à votre cuisine.",
         [
-          "Many of the compounds that give spices and botanicals their potency — volatile oils, delicate pigments, active constituents — begin to degrade the moment they're exposed to heat, light, or fluctuating humidity.",
+          "Many of the compounds that give spices and botanicals their potency, volatile oils, delicate pigments, active constituents, begin to degrade the moment they're exposed to heat, light, or fluctuating humidity.",
           "Maintaining a consistent cold chain from harvest through storage slows that degradation dramatically, which is why we track temperature and humidity at every handoff, not just at the warehouse door.",
           "Ingredients that require it are stored in climate-controlled rooms set to the specific range each botanical needs, rather than a single one-size-fits-all setting.",
           "The difference shows up in the final product: brighter color, fuller aroma, and a shelf life that holds up to what the label promises.",
@@ -355,10 +355,10 @@ async function main() {
       body: lt(
         "Découvrez les huiles et extraits d'origine végétale que nous utilisons pour assainir les surfaces sans produits chimiques synthétiques agressifs.",
         [
-          "Harsh synthetic sanitizers can leave residues that linger on porous surfaces — a particular concern in a facility handling ingredients meant to be consumed or applied to skin.",
+          "Harsh synthetic sanitizers can leave residues that linger on porous surfaces, a particular concern in a facility handling ingredients meant to be consumed or applied to skin.",
           "We rely instead on plant-derived antimicrobials, including thyme and tea tree oil concentrates, which offer meaningful antimicrobial activity without the residue risk of conventional chemical cleaners.",
           "These botanicals are rotated and combined based on current food-safety guidance, always validated against the same efficacy standards we'd expect of any sanitizing agent.",
-          "It's a slower, more deliberate approach to hygiene — one that treats the products we're protecting as carefully as the surfaces we're cleaning.",
+          "It's a slower, more deliberate approach to hygiene, one that treats the products we're protecting as carefully as the surfaces we're cleaning.",
         ].join("\n\n"),
         "",
         "",
@@ -390,7 +390,7 @@ async function main() {
         "Un aperçu du système d'analyse des risques et de maîtrise des points critiques qui régit chaque lot que nous testons et libérons.",
         [
           "Hazard Analysis and Critical Control Points, or HACCP, is a systematic framework for identifying where contamination risk is highest in a process, then building controls specifically around those points rather than inspecting only at the end.",
-          "For us, that means mapping every step from raw ingredient intake to final packaging, flagging critical control points — like moisture thresholds or metal detection — and setting measurable limits at each one.",
+          "For us, that means mapping every step from raw ingredient intake to final packaging, flagging critical control points, like moisture thresholds or metal detection, and setting measurable limits at each one.",
           "Every batch is logged against this framework, with records kept well beyond what regulation requires, so any question about a specific lot can be answered with data, not guesswork.",
           "It's less a certificate on the wall than a discipline built into how every batch moves through the facility.",
         ].join("\n\n"),
@@ -423,7 +423,7 @@ async function main() {
       body: lt(
         "Suivez le parcours d'un seul ingrédient, du champ du producteur jusqu'à l'étagère de votre cuisine, et les registres qui rendent cela possible.",
         [
-          "A single jar on our shelf can be traced back to the specific farm, harvest date, and processing batch it came from — a chain of custody we maintain from the moment an ingredient leaves the ground.",
+          "A single jar on our shelf can be traced back to the specific farm, harvest date, and processing batch it came from, a chain of custody we maintain from the moment an ingredient leaves the ground.",
           "That traceability isn't just a safety net for recalls; it's how we verify the sourcing claims on our labels are actually true, lot by lot.",
           "We work directly with growers wherever possible, which shortens the chain considerably compared to sourcing through intermediaries where records can get thin.",
           "When you can name the field an ingredient came from, quality stops being a marketing claim and becomes something you can actually stand behind.",
@@ -457,9 +457,9 @@ async function main() {
       body: lt(
         "Comprenez les protocoles d'étiquetage et de contact croisé qui protègent les consommateurs sensibles sans compromettre la saveur.",
         [
-          "Allergen management starts long before a product reaches packaging — with how ingredients are received, stored, and moved through a facility that handles a wide range of botanicals.",
+          "Allergen management starts long before a product reaches packaging, with how ingredients are received, stored, and moved through a facility that handles a wide range of botanicals.",
           "We maintain strict segregation for known allergens, dedicated equipment where cross-contact risk is highest, and validated cleaning protocols between runs that share equipment.",
-          "Labeling reflects not just what's intentionally included, but a rigorous assessment of what could plausibly cross-contact during processing — because a label is only as trustworthy as the process behind it.",
+          "Labeling reflects not just what's intentionally included, but a rigorous assessment of what could plausibly cross-contact during processing, because a label is only as trustworthy as the process behind it.",
           "For the people relying on us to get this right, there's no acceptable margin for shortcuts.",
         ].join("\n\n"),
         "",
@@ -493,7 +493,7 @@ async function main() {
         [
           "Turmeric's golden hue comes from curcumin, the compound responsible for both its color and much of the scientific interest surrounding this ancient root.",
           "Used for millennia across South Asian cooking and traditional medicine alike, turmeric has earned renewed attention for curcumin's anti-inflammatory properties, though the compound is notoriously difficult for the body to absorb on its own.",
-          "Pairing turmeric with black pepper's piperine, or a source of healthy fat, meaningfully improves absorption — a detail traditional preparations often got right long before the biochemistry was understood.",
+          "Pairing turmeric with black pepper's piperine, or a source of healthy fat, meaningfully improves absorption, a detail traditional preparations often got right long before the biochemistry was understood.",
           "Whether stirred into a warm milk ritual or blended into a savory spice mix, turmeric remains one of the most quietly powerful roots in the pantry.",
         ].join("\n\n"),
         "",
@@ -525,10 +525,10 @@ async function main() {
       body: lt(
         "Explorez le profil aromatique complexe de la cardamome, ses bienfaits digestifs, et pourquoi elle occupe une place vénérée dans les traditions sucrées comme salées.",
         [
-          "Cardamom's complex, slightly citrusy warmth has earned it a place in cuisines as varied as Scandinavian baking and Middle Eastern coffee — a versatility few spices can claim.",
+          "Cardamom's complex, slightly citrusy warmth has earned it a place in cuisines as varied as Scandinavian baking and Middle Eastern coffee, a versatility few spices can claim.",
           "Beyond flavor, cardamom has a long history in traditional digestive remedies, valued for its carminative properties that ease bloating and support digestion after a rich meal.",
           "Its essential oils are concentrated in the small black seeds housed within each pod, which is why whole pods retain their potency far longer than pre-ground cardamom.",
-          "For the freshest flavor, we recommend cracking pods just before use — a small ritual that unlocks the aromatic intensity this spice is prized for.",
+          "For the freshest flavor, we recommend cracking pods just before use, a small ritual that unlocks the aromatic intensity this spice is prized for.",
         ].join("\n\n"),
         "",
         "",
@@ -559,9 +559,9 @@ async function main() {
       body: lt(
         "Explorez la science derrière la L-théanine et les catéchines présentes dans le matcha de qualité cérémoniale, et son effet apaisant sur la concentration et l'énergie.",
         [
-          "Unlike steeped green tea, matcha is made from whole, shade-grown tea leaves ground into a fine powder — meaning you consume the entire leaf, not just what dissolves into the water.",
+          "Unlike steeped green tea, matcha is made from whole, shade-grown tea leaves ground into a fine powder, meaning you consume the entire leaf, not just what dissolves into the water.",
           "That distinction matters: matcha delivers significantly higher concentrations of catechins, particularly EGCG, along with L-theanine, an amino acid known for promoting calm, focused alertness rather than the jittery edge of coffee.",
-          "Ceremonial grade matcha, reserved for whisking rather than baking, comes from the youngest, most tender leaves — the reason its color and flavor are noticeably more vibrant than culinary-grade powder.",
+          "Ceremonial grade matcha, reserved for whisking rather than baking, comes from the youngest, most tender leaves, the reason its color and flavor are noticeably more vibrant than culinary-grade powder.",
           "A traditionally whisked bowl of matcha isn't just a beverage; it's a slow ritual built around a plant with genuinely exceptional nutritional density.",
         ].join("\n\n"),
         "",
@@ -594,7 +594,7 @@ async function main() {
         "Découvrez pourquoi cette racine chauffante ancre la médecine traditionnelle depuis des millénaires, et ce que la recherche moderne révèle sur ses bienfaits.",
         [
           "Ginger's warming, slightly peppery bite has made it a fixture of traditional medicine across Asia, Africa, and beyond for thousands of years, most notably as a remedy for nausea and digestive discomfort.",
-          "Modern research has largely validated that traditional use, with gingerol — the compound responsible for ginger's characteristic heat — shown to support digestion and ease inflammation.",
+          "Modern research has largely validated that traditional use, with gingerol, the compound responsible for ginger's characteristic heat, shown to support digestion and ease inflammation.",
           "Fresh ginger and dried ginger aren't interchangeable in effect: drying concentrates certain compounds while diminishing others, which is why traditional preparations often specify one or the other for a given use.",
           "Whether steeped as tea or grated into a meal, ginger remains one of the most well-studied roots in traditional medicine.",
         ].join("\n\n"),
@@ -661,10 +661,10 @@ async function main() {
       body: lt(
         "Explorez la science derrière cet adaptogène vénéré et son rôle traditionnel dans le soutien de la réponse du corps au stress.",
         [
-          "Ashwagandha has anchored Ayurvedic medicine for over 3,000 years, classified as a rasayana — a category of herbs traditionally used to promote vitality and resilience over time.",
+          "Ashwagandha has anchored Ayurvedic medicine for over 3,000 years, classified as a rasayana, a category of herbs traditionally used to promote vitality and resilience over time.",
           "In contemporary terms, it's best known as an adaptogen: a class of botanicals studied for their potential to help the body maintain balance under stress, rather than targeting a single symptom.",
-          "The root, rather than the leaf, carries the withanolides most associated with ashwagandha's traditional use — which is why quality preparations specify root-only sourcing.",
-          "It's a slow-acting herb by design, traditionally taken consistently over weeks rather than as a one-time remedy — patience being very much part of its use.",
+          "The root, rather than the leaf, carries the withanolides most associated with ashwagandha's traditional use, which is why quality preparations specify root-only sourcing.",
+          "It's a slow-acting herb by design, traditionally taken consistently over weeks rather than as a one-time remedy, patience being very much part of its use.",
         ].join("\n\n"),
         "",
         "",

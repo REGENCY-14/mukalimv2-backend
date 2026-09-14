@@ -12,7 +12,7 @@ export interface Actor {
 
 /**
  * Writes one activity_log row. Every mutating service call below invokes
- * this alongside its main effect — mirrors how every mutation in the
+ * this alongside its main effect, mirrors how every mutation in the
  * frontend's AdminDataContext.tsx pushes onto the same `activity` array.
  */
 export async function log(actor: Actor, action: string, targetLabel: string): Promise<void> {
@@ -25,7 +25,7 @@ export async function log(actor: Actor, action: string, targetLabel: string): Pr
 }
 
 export async function listActivity(query: Record<string, unknown>) {
-  // The topbar notification panel wants 6, the dashboard page wants more —
+  // The topbar notification panel wants 6, the dashboard page wants more, 
   // same endpoint, driven purely by `limit` (defaults generously for the page view).
   const { page, limit } = parsePageParams(query, 50);
   const offset = (page - 1) * limit;

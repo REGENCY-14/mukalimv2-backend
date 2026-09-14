@@ -7,7 +7,7 @@ const isProd = process.env.NODE_ENV === "production";
 const secure = process.env.COOKIE_SECURE === "true" || isProd;
 const domain = process.env.COOKIE_DOMAIN || undefined;
 // Frontend (Vercel) and backend (Render) live on different domains in
-// production, so the cookie is cross-site from the browser's point of view —
+// production, so the cookie is cross-site from the browser's point of view, 
 // that requires SameSite=None, which browsers only honor when Secure is
 // also set (guaranteed above: isProd implies secure=true). Local dev keeps
 // Lax since frontend/backend are both on localhost there.

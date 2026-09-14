@@ -25,7 +25,7 @@ export async function login(email: string, password: string): Promise<{ user: Au
     .where(eq(users.email, email.toLowerCase()))
     .limit(1);
 
-  // Same 401 for "no such user" and "wrong password" — the frontend shows one
+  // Same 401 for "no such user" and "wrong password", the frontend shows one
   // generic invalid-credentials message either way (SignInForm.tsx).
   if (!row || row.status === "disabled") throw new AppError(401, "UNAUTHENTICATED", "Invalid email or password.");
 
@@ -47,7 +47,7 @@ export async function refresh(refreshToken: string): Promise<Tokens> {
   try {
     payload = verifyRefreshToken(refreshToken);
   } catch {
-    throw AppError.unauthenticated("Invalid or expired session — please sign in again.");
+    throw AppError.unauthenticated("Invalid or expired session, please sign in again.");
   }
 
   const [row] = await db.select().from(users).where(eq(users.id, payload.sub)).limit(1);
@@ -71,7 +71,7 @@ function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-/** Returns the raw invite token — caller (controller) is responsible for
+/** Returns the raw invite token, caller (controller) is responsible for
  * delivering it out-of-band (email link) rather than ever storing it. */
 export async function issueInviteToken(userId: string): Promise<string> {
   const token = crypto.randomBytes(32).toString("hex");
@@ -104,20 +104,20 @@ export async function acceptInvite(token: string, password: string): Promise<{ u
   };
 }
 
-const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour — shorter-lived than invites, standard for reset links
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour, shorter-lived than invites, standard for reset links
 
 /**
  * Always resolves the same way regardless of whether the email matches an
- * account — the controller returns one generic "check your email" response
+ * account, the controller returns one generic "check your email" response
  * either way, so this never gives a caller a way to tell which emails are
  * registered. Silently does nothing for unknown or disabled accounts.
  *
  * Unlike issueInviteToken, this does NOT return the raw token to its
- * caller — it's emailed directly and only ever exists in memory here. The
+ * caller, it's emailed directly and only ever exists in memory here. The
  * API caller is the alleged account owner themselves, not a trusted admin
  * acting on someone else's behalf, so there's no safe way to expose a
  * fallback token if the email fails to send (that would let anyone "reset"
- * any address's password without ever proving inbox access) — a failed
+ * any address's password without ever proving inbox access), a failed
  * send is only logged server-side.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
@@ -142,7 +142,7 @@ export async function resetPassword(token: string, password: string): Promise<{ 
   const tokenHash = hashToken(token);
   const [row] = await db.select().from(users).where(eq(users.resetTokenHash, tokenHash)).limit(1);
 
-  // Also re-checks disabled here (not just at request time) — status could
+  // Also re-checks disabled here (not just at request time), status could
   // change between the two steps, and a disabled account shouldn't be able
   // to regain access via a reset link issued before it was disabled.
   if (!row || !row.resetTokenExpiresAt || row.resetTokenExpiresAt.getTime() < Date.now() || row.status === "disabled") {
@@ -155,7 +155,7 @@ export async function resetPassword(token: string, password: string): Promise<{ 
     .set({
       passwordHash,
       // Proving inbox access + setting a real password activates the
-      // account the same way accept-invite does — covers an "invited" user
+      // account the same way accept-invite does, covers an "invited" user
       // who uses forgot-password instead of ever completing accept-invite.
       status: "active",
       resetTokenHash: null,

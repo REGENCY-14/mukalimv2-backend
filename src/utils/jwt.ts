@@ -7,10 +7,10 @@ const ACCESS_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN ?? "15m";
 const REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN ?? "30d";
 
 if (!rawAccessSecret || !rawRefreshSecret) {
-  throw new Error("JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be set — copy .env.example to .env first.");
+  throw new Error("JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be set, copy .env.example to .env first.");
 }
 
-// Re-bound to plain `string` bindings — narrowing a closed-over module-level
+// Re-bound to plain `string` bindings, narrowing a closed-over module-level
 // `const` doesn't survive into the function bodies below, so we capture the
 // already-validated value in a freshly (and correctly) typed variable.
 const ACCESS_SECRET: string = rawAccessSecret;

@@ -7,22 +7,22 @@ export const users = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
-    // Stored lowercased by the app layer — a plain unique index stands in for
+    // Stored lowercased by the app layer, a plain unique index stands in for
     // Postgres's `citext` type so no extra extension is required to run this.
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
     role: roleEnum("role").notNull(),
     status: userStatusEnum("status").notNull().default("invited"),
-    // A Tailwind class token (e.g. "bg-brand-gold"), not a hex value — see
+    // A Tailwind class token (e.g. "bg-brand-gold"), not a hex value, see
     // the initials-avatar palette already used by the frontend.
     avatarColor: text("avatar_color").notNull().default("bg-brand-gold"),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     // Set on invite (POST /api/admin/users, aliased at /api/auth/invite);
     // cleared once accept-invite succeeds. We store a hash of the token,
-    // never the token itself — see authService.acceptInvite.
+    // never the token itself, see authService.acceptInvite.
     inviteTokenHash: text("invite_token_hash"),
     inviteTokenExpiresAt: timestamp("invite_token_expires_at", { withTimezone: true }),
-    // Separate columns for POST /api/auth/forgot-password + reset-password —
+    // Separate columns for POST /api/auth/forgot-password + reset-password, 
     // kept independent from the invite token above so an in-flight invite
     // and a password-reset request never interfere with each other. See
     // authService.requestPasswordReset / resetPassword.

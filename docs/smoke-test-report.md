@@ -1,4 +1,4 @@
-# Smoke test report — local dev against Supabase
+# Smoke test report, local dev against Supabase
 
 Date: 2026-09-04
 Environment: Supabase project `bitomyqwngxdpbyrutrj` (`eu-north-1`, Postgres 17.4), local `npm run dev` on `http://localhost:4000`.
@@ -8,9 +8,9 @@ Environment: Supabase project `bitomyqwngxdpbyrutrj` (`eu-north-1`, Postgres 17.
 | Step | Result |
 |---|---|
 | Supabase connection | ✅ Reachable, project restored from paused state |
-| `.env` from `.env.example` | ✅ `DATABASE_URL` (Supavisor session pooler — direct connection host is IPv6-only and unreachable from this network), `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` generated |
+| `.env` from `.env.example` | ✅ `DATABASE_URL` (Supavisor session pooler, direct connection host is IPv6-only and unreachable from this network), `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` generated |
 | `npm run db:migrate` | ✅ 9 tables created, matching `src/db/schema/` |
-| `npm run db:seed` | ✅ 5 categories, 15 content items, 23 media, 5 users (1 admin / 2 editor / 2 viewer), 7 activity log entries — verified via direct SQL, not console output |
+| `npm run db:seed` | ✅ 5 categories, 15 content items, 23 media, 5 users (1 admin / 2 editor / 2 viewer), 7 activity log entries, verified via direct SQL, not console output |
 
 ## API smoke tests
 
@@ -30,12 +30,12 @@ Re-run in full after the DB password rotation (see below) with identical results
 
 ## Bugs found and fixed during testing
 
-1. **Malformed array literal in ID-array filters** (`categoryService.ts`, `contentService.ts`, `mediaService.ts`): `sql\`${col} = ANY(${array})\`` didn't bind JS arrays correctly, breaking every admin list/get for categories, content, and media. Fixed by switching to drizzle-orm's `inArray()` helper. See [`0001` — PR #1](https://github.com/REGENCY-14/mukalimv2-backend/pull/1).
-2. **RLS disabled on all 9 tables** (Supabase advisor finding): enabled RLS with no policies — the app connects as the table owner (`postgres`), which Postgres exempts from RLS by default, so this was transparent to the app while closing the exposure to the `anon`/`authenticated` roles. See [`drizzle/0001_enable_rls.sql` — PR #2](https://github.com/REGENCY-14/mukalimv2-backend/pull/2).
+1. **Malformed array literal in ID-array filters** (`categoryService.ts`, `contentService.ts`, `mediaService.ts`): `sql\`${col} = ANY(${array})\`` didn't bind JS arrays correctly, breaking every admin list/get for categories, content, and media. Fixed by switching to drizzle-orm's `inArray()` helper. See [`0001`, PR #1](https://github.com/REGENCY-14/mukalimv2-backend/pull/1).
+2. **RLS disabled on all 9 tables** (Supabase advisor finding): enabled RLS with no policies, the app connects as the table owner (`postgres`), which Postgres exempts from RLS by default, so this was transparent to the app while closing the exposure to the `anon`/`authenticated` roles. See [`drizzle/0001_enable_rls.sql`, PR #2](https://github.com/REGENCY-14/mukalimv2-backend/pull/2).
 
 ## Known discrepancies (not bugs, just noted)
 
-- Seed produces **23** media items; an earlier expectation (from outside this repo) assumed 22. Investigated directly: [`seed.ts`](../src/db/seed.ts)'s `mediaSeeds` array has exactly 23 hand-written entries, no duplicate `filename`/`url` values, no off-by-one in the insert loop. The README never actually stated a media count anywhere, so there was no incorrect value in the repo to fix — added a seeded-record-count table to the README instead so this can't recur.
+- Seed produces **23** media items; an earlier expectation (from outside this repo) assumed 22. Investigated directly: [`seed.ts`](../src/db/seed.ts)'s `mediaSeeds` array has exactly 23 hand-written entries, no duplicate `filename`/`url` values, no off-by-one in the insert loop. The README never actually stated a media count anywhere, so there was no incorrect value in the repo to fix, added a seeded-record-count table to the README instead so this can't recur.
 - Repo's JWT env vars are `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`, not `JWT_SECRET`.
 - Admin/editor/category/user/content routes live under `/api/admin/...`, not bare `/categories` or `/users`.
 

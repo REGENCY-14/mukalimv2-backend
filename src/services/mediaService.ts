@@ -20,7 +20,7 @@ function toLocalizedText(rows: { locale: string; value: string }[]): LocalizedTe
 /**
  * "usedIn" is computed on read rather than hand-maintained (the mock's
  * `usedIn: string[]` was just seeded label strings with no real
- * referential link — see media_usage in the schema doc). Two EXISTS-style
+ * referential link, see media_usage in the schema doc). Two EXISTS-style
  * lookups against categories/content_items instead of a join table.
  */
 async function attachUsage(rows: (typeof media.$inferSelect)[]) {
@@ -158,7 +158,7 @@ export async function remove(id: string, actor: Actor) {
   if (!existing) throw AppError.notFound("Media item not found.");
 
   // Mirrors categoryService.remove's block-on-referenced-content check, just
-  // matching on the stored URL string instead of a foreign key — there is
+  // matching on the stored URL string instead of a foreign key, there is
   // no FK from categories/content_items to media (see attachUsage above),
   // only these three plain-text URL columns across the whole schema.
   const [categoryRefs, contentRefs] = await Promise.all([
@@ -177,12 +177,12 @@ export async function remove(id: string, actor: Actor) {
     if (contentRefs.length > 0) {
       parts.push(`content ${contentRefs.map((c) => `'${c.slug}'`).join(", ")}`);
     }
-    throw AppError.conflict(`Cannot delete '${existing.filename}' — referenced by ${parts.join(" and ")}.`);
+    throw AppError.conflict(`Cannot delete '${existing.filename}', referenced by ${parts.join(" and ")}.`);
   }
 
   await db.delete(media).where(eq(media.id, id));
 
-  // Best-effort cleanup in Supabase Storage — a no-op for seed-data rows
+  // Best-effort cleanup in Supabase Storage, a no-op for seed-data rows
   // whose URL points at the frontend's static assets rather than something
   // this backend ever uploaded (see isManagedUrl in utils/storage.ts).
   await deleteFile(existing.url);

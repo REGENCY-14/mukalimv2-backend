@@ -1,4 +1,4 @@
-# Render Blueprint — see https://render.com/docs/blueprint-spec
+# Render Blueprint, see https://render.com/docs/blueprint-spec
 #
 # This is optional: the repo deploys fine through Render's plain "New Web
 # Service" wizard without it (Node runtime, `npm ci && npm run build` /
@@ -6,7 +6,7 @@
 # that config reproducible/reviewable in git instead of only living in the
 # dashboard, and documents every env var the service needs.
 #
-# Secret values are intentionally NOT set here (sync: false) — Render will
+# Secret values are intentionally NOT set here (sync: false), Render will
 # prompt for them once when you create the service from this Blueprint, or
 # you enter them by hand in Settings → Environment if you set the service
 # up through the plain wizard instead. See docs/render-deploy.md for the
@@ -19,14 +19,14 @@ services:
     region: frankfurt # closest Render region to the eu-north-1 Supabase project; change if needed
     # --include=dev is required: NODE_ENV=production is set as an env var
     # below, and Render applies configured env vars during the build phase
-    # too — plain `npm ci` reads NODE_ENV=production and silently skips
+    # too, plain `npm ci` reads NODE_ENV=production and silently skips
     # devDependencies (including typescript itself), breaking the build.
     # See docs/render-deploy.md for how this was diagnosed.
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /health
     # Runs after a successful build, before traffic is switched to the new
-    # deploy. Commented out by default — see docs/render-deploy.md for why
+    # deploy. Commented out by default, see docs/render-deploy.md for why
     # this needs a deliberate one-time decision rather than being turned on
     # blindly (it also runs on every subsequent deploy, and drizzle-orm's
     # migrator is safe to re-run since already-applied migrations are
@@ -64,7 +64,7 @@ services:
         value: https://mukalim-v2.vercel.app
       - key: SEED_DEMO_PASSWORD
         sync: false
-      # PORT is injected automatically by Render — do not set it.
-      # COOKIE_DOMAIN is intentionally omitted — see docs/render-deploy.md;
+      # PORT is injected automatically by Render, do not set it.
+      # COOKIE_DOMAIN is intentionally omitted, see docs/render-deploy.md;
       # setting it in production (frontend and backend on different
       # domains) will break auth.

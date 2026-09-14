@@ -116,7 +116,7 @@ export async function listAdmin(query: Record<string, unknown>) {
   let data = await attachAdminFields(rows);
 
   // "language" filters to items with a non-empty translation in that
-  // language — mirrors item.title[languageFilter].trim() in content/page.tsx.
+  // language, mirrors item.title[languageFilter].trim() in content/page.tsx.
   // Applied post-fetch since it depends on the joined translation text.
   if (typeof query.language === "string") {
     const lang = query.language as keyof LocalizedText;
@@ -186,7 +186,7 @@ export async function update(id: string, input: UpdateContentInput, actor: Actor
   }
 
   // Set published_at server-side only the first time status transitions to
-  // 'published' — never overwrite it on subsequent edits (see schema doc).
+  // 'published', never overwrite it on subsequent edits (see schema doc).
   let activityAction = "updated";
   if (input.status !== undefined && input.status !== existing.status) {
     patch.status = input.status;

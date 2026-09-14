@@ -3,7 +3,7 @@
 Backend API for the [MUKALIM](https://mukalim-v2.vercel.app) public site and admin
 dashboard. Node.js + Express + TypeScript, PostgreSQL via Drizzle ORM, JWT
 sessions in httpOnly cookies. Built to be a drop-in replacement for the
-frontend's mock data layer — see [`docs/`](../Mukalim-v2/docs) in the
+frontend's mock data layer, see [`docs/`](../Mukalim-v2/docs) in the
 frontend repo (`API_ENDPOINTS.md`, `DATABASE_SCHEMA.md`) for the source
 scope this implements.
 
@@ -23,7 +23,7 @@ scope this implements.
 src/
   db/schema/     Drizzle table definitions (source of truth for the schema)
   db/            db client, migrate script, seed script
-  routes/        Express routers — one per resource
+  routes/        Express routers, one per resource
   controllers/   thin request/response glue
   services/      business logic + queries (the layer routes/controllers call into)
   middleware/    auth, RBAC, validation, error handling, uploads, rate limiting
@@ -53,10 +53,10 @@ src/
    | `CORS_ORIGINS` | Comma-separated list of allowed frontend origins |
    | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | ≥32-char random secrets |
    | `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | token lifetimes |
-   | `COOKIE_DOMAIN` / `COOKIE_SECURE` | cookie flags — set `COOKIE_SECURE=true` in production (HTTPS) |
+   | `COOKIE_DOMAIN` / `COOKIE_SECURE` | cookie flags, set `COOKIE_SECURE=true` in production (HTTPS) |
    | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Supabase Storage for media uploads (same project as `DATABASE_URL`) |
    | `MAX_UPLOAD_SIZE_MB` | max upload size per file |
-   | `RESEND_API_KEY` / `INVITE_EMAIL_FROM` / `FRONTEND_URL` | invite emails (optional — falls back to returning the raw token if unset) |
+   | `RESEND_API_KEY` / `INVITE_EMAIL_FROM` / `FRONTEND_URL` | invite emails (optional, falls back to returning the raw token if unset) |
    | `SEED_DEMO_PASSWORD` | password set on every seeded demo user |
 
 3. **Create the database** (any local Postgres works)
@@ -72,7 +72,7 @@ src/
    npm run db:migrate    # applies it
    ```
 
-5. **Seed demo data** (matches the frontend's mock data — same categories,
+5. **Seed demo data** (matches the frontend's mock data, same categories,
    sample content, and 5 users across all three roles)
 
    ```bash
@@ -111,34 +111,34 @@ src/
 ## Auth notes
 
 - Sessions are two JWTs (access ~15m, refresh ~30d) set as httpOnly,
-  `SameSite=Lax` cookies — `POST /api/auth/login` sets both,
+  `SameSite=Lax` cookies, `POST /api/auth/login` sets both,
   `POST /api/auth/refresh` rotates them, `POST /api/auth/logout` clears them.
 - Refresh tokens are **stateless** (verified by signature + expiry only,
-  no server-side revocation list) — logout only clears the cookie
+  no server-side revocation list), logout only clears the cookie
   client-side. Add a `token_version` column + check before shipping this to
   production if you need "log out everywhere" or forced revocation.
 - The invite flow (`POST /api/admin/users`, aliased at `POST /api/auth/invite`)
-  takes just `email` + `role` (`name` is optional — derived from the email's
+  takes just `email` + `role` (`name` is optional, derived from the email's
   local part if omitted, e.g. `amara.osei@...` → "Amara Osei"; correctable
   later via `PATCH /api/admin/users/:id`). It creates a `status: "invited"`
   user and emails them an accept-invite link via Resend
-  (`src/utils/email.ts`) — see `RESEND_API_KEY`/`INVITE_EMAIL_FROM`/
+  (`src/utils/email.ts`), see `RESEND_API_KEY`/`INVITE_EMAIL_FROM`/
   `FRONTEND_URL` above. If Resend isn't configured or the send fails, the
   response falls back to `{ emailSent: false, inviteToken }` so the admin
   can deliver the link manually instead. `POST /api/auth/accept-invite`
   exchanges that token + a chosen password to activate the account.
 - Forgot password: `POST /api/auth/forgot-password` (just `email`) always
   returns the same generic "check your email" response whether or not the
-  address is registered — enumeration-safe, matching the equivalent choice
+  address is registered, enumeration-safe, matching the equivalent choice
   many real auth systems make. If it matches an active, non-disabled
   account, a 1-hour reset token is emailed via `sendPasswordResetEmail`.
-  Unlike the invite flow, there's no `emailSent`/fallback-token response —
+  Unlike the invite flow, there's no `emailSent`/fallback-token response, 
   the caller here is the alleged account owner, not a trusted admin acting
   on someone else's behalf, so the token only ever goes out over email.
   `POST /api/auth/reset-password` (`token` + new `password`, ≥8 chars)
   completes it and logs the user in, same as accept-invite.
 - The frontend's "preview as" role switcher (`Topbar.tsx`) is a dev-only UI
-  affordance with no server counterpart here by design — see the note in
+  affordance with no server counterpart here by design, see the note in
   `docs/API_ENDPOINTS.md`.
 
 ## Role-based access control
@@ -152,7 +152,7 @@ Mirrors `src/lib/admin/permissions.ts` in the frontend:
 | `admin` | ✅ | ✅ | ✅ |
 
 Enforced server-side in `src/middleware/rbac.ts` (`requireEditor`,
-`requireAdmin`), applied per-route — not just hidden in the UI.
+`requireAdmin`), applied per-route, not just hidden in the UI.
 
 ## Endpoints
 
@@ -168,29 +168,29 @@ Base path `/api`. Full request/response shapes are in the frontend repo's
 `GET /categories` · `GET /categories/:slug` ·
 `GET /categories/:slug/articles` · `GET /categories/:slug/articles/:articleSlug`
 
-**Admin — Categories** (`canEdit` for writes)
+**Admin, Categories** (`canEdit` for writes)
 `GET /admin/categories` · `POST /admin/categories` ·
 `PATCH /admin/categories/:id` · `PATCH /admin/categories/:id/toggle-active` ·
 `DELETE /admin/categories/:id` *(blocked with 409 while content still
 references the category)*
 
-**Admin — Content** (`canEdit` for writes)
+**Admin, Content** (`canEdit` for writes)
 `GET /admin/content` · `GET /admin/content/:id` · `POST /admin/content` ·
 `PATCH /admin/content/:id` · `DELETE /admin/content/:id`
 
-**Admin — Media** (`canEdit` for writes)
+**Admin, Media** (`canEdit` for writes)
 `GET /admin/media` · `POST /admin/media` (multipart, field `files`, image
 types only, 10MB/file max) · `PATCH /admin/media/:id/alt-text` ·
 `DELETE /admin/media/:id`
 
-**Admin — Users** (admin only, every route)
+**Admin, Users** (admin only, every route)
 `GET /admin/users` · `POST /admin/users` · `PATCH /admin/users/:id` ·
 `DELETE /admin/users/:id` *(blocked deleting yourself or the last admin)*
 
-**Admin — Dashboard**
+**Admin, Dashboard**
 `GET /admin/dashboard/stats` · `GET /admin/dashboard/activity`
 
-**Admin — Settings** (singleton, `canEdit` for writes)
+**Admin, Settings** (singleton, `canEdit` for writes)
 `GET /admin/settings` · `PATCH /admin/settings`
 
 ## Errors
@@ -202,8 +202,8 @@ to this shape automatically (`src/middleware/errorHandler.ts`).
 
 ## File storage
 
-Uploads go to a Supabase Storage bucket (`media`, public — see
-`drizzle/0003_create_media_storage_bucket.sql`), not local disk — Render's
+Uploads go to a Supabase Storage bucket (`media`, public, see
+`drizzle/0003_create_media_storage_bucket.sql`), not local disk, Render's
 standard web service filesystem is ephemeral, so local disk doesn't survive
 a redeploy or a free-tier instance restart. `src/middleware/upload.ts` holds
 files in memory (`multer.memoryStorage()`) just long enough to hand them to
@@ -217,5 +217,5 @@ that `url` string, same as always. Requires `SUPABASE_URL` and
 - No refresh-token revocation list (see Auth notes above).
 - `category_id`/`content_id` deletes are hard deletes, no soft-delete/trash.
 - CORS/cookie config assumes the API and frontend are on different origins
-  behind HTTPS in production — double-check `COOKIE_SECURE`, `COOKIE_DOMAIN`,
+  behind HTTPS in production, double-check `COOKIE_SECURE`, `COOKIE_DOMAIN`,
   and `CORS_ORIGINS` before deploying.

@@ -8,7 +8,7 @@ import { uuidParamSchema } from "../schemas/common";
 
 const router = Router();
 
-// Entirely gated to admin — both viewing the page and every mutation.
+// Entirely gated to admin, both viewing the page and every mutation.
 router.use(requireAuth, requireAdmin);
 
 router.get("/", userController.list);

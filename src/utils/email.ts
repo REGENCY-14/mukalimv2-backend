@@ -1,12 +1,12 @@
 import { Resend } from "resend";
 
-// Env vars are checked lazily (inside sendInviteEmail), not at module load —
+// Env vars are checked lazily (inside sendInviteEmail), not at module load, 
 // unlike src/utils/storage.ts, a missing key here should only break the
 // invite feature, not crash the whole server on startup.
 let client: Resend | null = null;
 function getClient(): Resend {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("RESEND_API_KEY must be set — copy .env.example and fill it in.");
+  if (!apiKey) throw new Error("RESEND_API_KEY must be set, copy .env.example and fill it in.");
   if (!client) client = new Resend(apiKey);
   return client;
 }
@@ -21,7 +21,7 @@ const ROLE_LABELS: Record<string, string> = {
   viewer: "a Viewer",
 };
 
-/** Mirrors the frontend's brand tokens (src/app/globals.css) — email
+/** Mirrors the frontend's brand tokens (src/app/globals.css), email
  * clients strip <style> blocks from most contexts, so everything here is
  * inlined rather than shared with the frontend's Tailwind theme. */
 const BRAND = {
@@ -87,7 +87,7 @@ function inviteEmailHtml(opts: { name: string; role: string; acceptUrl: string; 
 
 /** Sends the invite email and returns the Resend message id (for delivery
  * status lookups). Throws if RESEND_API_KEY/FRONTEND_URL aren't set, or if
- * Resend itself reports an error — callers decide how to degrade (see
+ * Resend itself reports an error, callers decide how to degrade (see
  * userService.invite, which falls back to returning the raw token). */
 export async function sendInviteEmail(to: string, name: string, token: string, role: string): Promise<string> {
   const frontendUrl = requireFrontendUrl();
@@ -108,7 +108,7 @@ export async function sendInviteEmail(to: string, name: string, token: string, r
 function requireFrontendUrl(): string {
   const raw = process.env.FRONTEND_URL;
   if (!raw) {
-    throw new Error("FRONTEND_URL must be set (e.g. https://mukalim-v2.vercel.app) — used to build email links.");
+    throw new Error("FRONTEND_URL must be set (e.g. https://mukalim-v2.vercel.app), used to build email links.");
   }
   return raw.replace(/\/+$/, "");
 }
@@ -149,7 +149,7 @@ function passwordResetEmailHtml(opts: { name: string; resetUrl: string; frontend
               </tr>
             </table>
             <p style="margin:28px 0 0;font-size:13px;line-height:1.6;color:${BRAND.brown};opacity:0.75;">
-              This link expires in 1 hour. If you didn't request this, you can safely ignore this email — your password won't be changed.
+              This link expires in 1 hour. If you didn't request this, you can safely ignore this email, your password won't be changed.
             </p>
           </td>
         </tr>
@@ -164,11 +164,11 @@ function passwordResetEmailHtml(opts: { name: string; resetUrl: string; frontend
 }
 
 /** Sends the password reset email and returns the Resend message id. Throws
- * under the same conditions as sendInviteEmail — see
+ * under the same conditions as sendInviteEmail, see
  * authService.requestPasswordReset, which deliberately does NOT expose any
  * fallback token to the caller on failure (unlike invites, the API caller
  * here is the alleged account owner themselves, not a trusted admin acting
- * on someone else's behalf — returning the token directly would let anyone
+ * on someone else's behalf, returning the token directly would let anyone
  * "reset" any email's password without ever proving inbox access). */
 export async function sendPasswordResetEmail(to: string, name: string, token: string): Promise<string> {
   const frontendUrl = requireFrontendUrl();

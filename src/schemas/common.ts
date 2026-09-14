@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sanitizePlainText, sanitizeRichText } from "../utils/sanitize";
 
-// Reused everywhere a LocalizedText field is authored — matches
+// Reused everywhere a LocalizedText field is authored, matches
 // `LocalizedText` in the frontend (`{ fr, en, de, it }`, empty = untranslated).
 export const localizedTextSchema = z.object({
   fr: z.string(),
@@ -13,7 +13,7 @@ export const localizedTextSchema = z.object({
 // Partial version for PATCH bodies that only touch a subset of locales.
 export const partialLocalizedTextSchema = localizedTextSchema.partial();
 
-// Applies `fn` to each present locale value — used by the sanitizing
+// Applies `fn` to each present locale value, used by the sanitizing
 // variants below. `.partial()` results may omit some keys entirely (never
 // present-with-undefined), but this stays defensive either way.
 function mapLocales<T extends Partial<Record<string, string>>>(obj: T, fn: (value: string) => string): T {
@@ -25,9 +25,9 @@ function mapLocales<T extends Partial<Record<string, string>>>(obj: T, fn: (valu
   return out;
 }
 
-// Sanitizing variants — for any field authored as free text that ends up
+// Sanitizing variants, for any field authored as free text that ends up
 // rendered on the public site. "Plain" strips all markup (titles, names,
-// alt text, SEO fields — none of these are meant to contain HTML at all);
+// alt text, SEO fields, none of these are meant to contain HTML at all);
 // "Rich" allows a small safe formatting subset (article body only). See
 // src/utils/sanitize.ts.
 export const localizedPlainTextSchema = localizedTextSchema.transform((val) => mapLocales(val, sanitizePlainText));
@@ -36,9 +36,9 @@ export const localizedRichTextSchema = localizedTextSchema.transform((val) => ma
 export const partialLocalizedRichTextSchema = partialLocalizedTextSchema.transform((val) => mapLocales(val, sanitizeRichText));
 
 // Accepts either a relative path (frontend static assets, e.g.
-// "/mukalim/icon-cosmetics.svg" — the seed data's default icons) or an
+// "/mukalim/icon-cosmetics.svg", the seed data's default icons) or an
 // absolute http(s) URL (uploaded media, Supabase Storage's public URLs).
-// Deliberately NOT z.string().url() — that requires an absolute URL and
+// Deliberately NOT z.string().url(), that requires an absolute URL and
 // would reject every relative-path default this app already relies on.
 // Rejects javascript:/data:/etc. schemes either way.
 function safeUrl(base: z.ZodString) {

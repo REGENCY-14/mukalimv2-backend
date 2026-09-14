@@ -4,11 +4,11 @@ import { localeEnum } from "./enums";
 export const categories = pgTable("categories", {
   id: uuid("id").primaryKey().defaultRandom(),
   // Auto-derived from the English name client-side (slugify() in
-  // CategoryFormPanel.tsx) but editable — uniqueness is still enforced here.
+  // CategoryFormPanel.tsx) but editable, uniqueness is still enforced here.
   slug: text("slug").notNull(),
   iconUrl: text("icon_url").notNull().default("/mukalim/icon-cosmetics.svg"),
-  // Background image behind the category page's hero banner (CategoryHero.tsx)
-  // — distinct from the small nav/grid icon above.
+  // Background image behind the category page's hero banner (CategoryHero.tsx),
+  // distinct from the small nav/grid icon above.
   heroImageUrl: text("hero_image_url").notNull().default("/mukalim/cosmetics-hero.jpg"),
   displayOrder: integer("display_order").notNull().default(1),
   active: boolean("active").notNull().default(true),

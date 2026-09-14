@@ -1,14 +1,14 @@
 -- Public read policies for the anon/authenticated roles (Supabase's
 -- PostgREST + client-SDK access path). The app's own backend connects as
 -- the table owner ("postgres", which has BYPASSRLS) and is unaffected by
--- any of this — these policies only matter if this project's anon/service
+-- any of this, these policies only matter if this project's anon/service
 -- keys are ever used directly against Supabase's REST API.
 --
 -- anon/authenticated already hold blanket table-level GRANTs (Supabase's
 -- schema-wide default for `public`), so RLS policies are the only thing
 -- gating row visibility here. Only SELECT is granted below; with no
 -- INSERT/UPDATE/DELETE policy defined, those remain fully denied to both
--- roles by Postgres's RLS default-deny — no explicit "deny" policy needed.
+-- roles by Postgres's RLS default-deny, no explicit "deny" policy needed.
 --
 -- categories / content_items expose only what's actually public:
 --   - categories:      active = true
@@ -16,13 +16,13 @@
 -- The *_translations tables have no visibility flag of their own, so their
 -- policies join back to the parent row's flag.
 --
--- media has no status/active column at all — it's just an asset record.
+-- media has no status/active column at all, it's just an asset record.
 -- Rather than exposing all media metadata unconditionally, visibility
 -- mirrors mediaService.attachUsage()'s own "usedIn" computation: a media
 -- row is public if its URL is the icon/hero image of an active category or
 -- the featured image of a published content item.
 --
--- users, activity_log, and settings intentionally get no policies at all —
+-- users, activity_log, and settings intentionally get no policies at all, 
 -- nothing should ever read those directly via anon/authenticated.
 
 drop policy if exists "Public can view active categories" on "categories";--> statement-breakpoint

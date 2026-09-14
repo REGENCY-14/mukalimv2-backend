@@ -9,12 +9,12 @@ export const activityLog = pgTable(
     actorUserId: uuid("actor_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    // Snapshot the role *at the time of the action* — the dev-only "preview
+    // Snapshot the role *at the time of the action*, the dev-only "preview
     // as" role switcher can change a session's effective role without
     // changing the underlying user.
     actorRole: roleEnum("actor_role").notNull(),
     // Short verb phrase, e.g. "created the", "updated", "set to draft",
-    // "uploaded", "invited", "removed" — the frontend concatenates
+    // "uploaded", "invited", "removed", the frontend concatenates
     // actor + action + target directly into a sentence, keep these stable.
     action: text("action").notNull(),
     // Human-readable target, e.g. "'Turmeric: The Golden Healer'".

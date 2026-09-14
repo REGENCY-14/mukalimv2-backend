@@ -13,7 +13,7 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 export const create = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthenticated();
   const files = (req.files as Express.Multer.File[]) || [];
-  if (files.length === 0) throw AppError.badRequest("No files were uploaded — send them under the 'files' field.");
+  if (files.length === 0) throw AppError.badRequest("No files were uploaded, send them under the 'files' field.");
 
   const uploaded = await Promise.all(
     files.map(async (file) => {
@@ -26,7 +26,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
         width = meta.width ?? 0;
         height = meta.height ?? 0;
       } catch {
-        // SVGs and a few odd formats may not report dimensions — non-fatal.
+        // SVGs and a few odd formats may not report dimensions, non-fatal.
       }
       const url = await uploadFile(file.originalname, file.buffer, file.mimetype);
       return {

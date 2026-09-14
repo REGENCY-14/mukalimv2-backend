@@ -45,13 +45,13 @@ export const acceptInvite = asyncHandler(async (req: Request, res: Response) => 
 });
 
 // Validated at the route level (validate({ body: forgotPasswordSchema }) /
-// resetPasswordSchema), same pattern as login — unlike acceptInvite/invite
+// resetPasswordSchema), same pattern as login, unlike acceptInvite/invite
 // above, which parse inline.
 export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
   await authService.requestPasswordReset(email);
 
-  // Identical response whether or not the email matches an account — never
+  // Identical response whether or not the email matches an account, never
   // reveals which addresses are registered. See authService for the actual
   // (also enumeration-safe) logic.
   res.status(200).json({ message: "If an account exists for that email, a password reset link has been sent." });
@@ -65,7 +65,7 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
 });
 
 /**
- * Alias for POST /api/admin/users — the same admin-only invite flow, kept
+ * Alias for POST /api/admin/users, the same admin-only invite flow, kept
  * reachable under /api/auth/invite too since that's where it's listed in
  * the original endpoint scope. Both routes call userService.invite.
  */
@@ -75,7 +75,7 @@ export const invite = asyncHandler(async (req: Request, res: Response) => {
   const { user, emailSent, inviteToken } = await userService.invite(input, { id: req.user.id, role: req.user.role });
 
   // inviteToken is only present when emailSent is false (Resend not
-  // configured, or the send failed) — a fallback so the admin can still
+  // configured, or the send failed), a fallback so the admin can still
   // deliver the link manually. See userService.invite / utils/email.ts.
   res.status(201).json({ user, emailSent, inviteToken });
 });
