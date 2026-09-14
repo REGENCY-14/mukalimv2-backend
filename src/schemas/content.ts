@@ -1,29 +1,30 @@
 import { z } from "zod";
-import { localizedTextSchema, partialLocalizedTextSchema } from "./common";
+import { localizedPlainTextSchema, localizedRichTextSchema, partialLocalizedPlainTextSchema, partialLocalizedRichTextSchema, safeUrlSchema } from "./common";
+import { sanitizePlainText } from "../utils/sanitize";
 
 export const createContentSchema = z.object({
   categoryId: z.string().uuid(),
   slug: z.string().min(1).max(150).optional(), // auto-derived from title.en if omitted
-  tag: z.string().min(1),
-  title: localizedTextSchema,
-  excerpt: localizedTextSchema,
-  featuredImage: z.string().min(1),
-  body: localizedTextSchema,
-  seoTitle: localizedTextSchema,
-  seoDescription: localizedTextSchema,
+  tag: z.string().min(1).transform(sanitizePlainText),
+  title: localizedPlainTextSchema,
+  excerpt: localizedPlainTextSchema,
+  featuredImage: safeUrlSchema,
+  body: localizedRichTextSchema,
+  seoTitle: localizedPlainTextSchema,
+  seoDescription: localizedPlainTextSchema,
   status: z.enum(["draft", "published"]).default("draft"),
 });
 
 export const updateContentSchema = z.object({
   categoryId: z.string().uuid().optional(),
   slug: z.string().min(1).max(150).optional(),
-  tag: z.string().min(1).optional(),
-  title: partialLocalizedTextSchema.optional(),
-  excerpt: partialLocalizedTextSchema.optional(),
-  featuredImage: z.string().min(1).optional(),
-  body: partialLocalizedTextSchema.optional(),
-  seoTitle: partialLocalizedTextSchema.optional(),
-  seoDescription: partialLocalizedTextSchema.optional(),
+  tag: z.string().min(1).transform(sanitizePlainText).optional(),
+  title: partialLocalizedPlainTextSchema.optional(),
+  excerpt: partialLocalizedPlainTextSchema.optional(),
+  featuredImage: safeUrlSchema.optional(),
+  body: partialLocalizedRichTextSchema.optional(),
+  seoTitle: partialLocalizedPlainTextSchema.optional(),
+  seoDescription: partialLocalizedPlainTextSchema.optional(),
   status: z.enum(["draft", "published"]).optional(),
 });
 
