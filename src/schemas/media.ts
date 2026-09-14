@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { localizedTextSchema } from "./common";
+import { localizedPlainTextSchema } from "./common";
 
 export const updateAltTextSchema = z.object({
-  altText: localizedTextSchema,
+  altText: localizedPlainTextSchema,
 });
 
 export const listMediaQuerySchema = z.object({

@@ -1,16 +1,17 @@
 import { z } from "zod";
+import { sanitizePlainText } from "../utils/sanitize";
 
 export const inviteUserSchema = z.object({
   // Optional — invites can be sent with just an email; a placeholder name is
   // derived from the address (see userService.deriveNameFromEmail) and can
   // be corrected later via PATCH /api/admin/users/:id.
-  name: z.string().min(1).optional(),
+  name: z.string().min(1).transform(sanitizePlainText).optional(),
   email: z.string().email(),
   role: z.enum(["admin", "editor", "viewer"]),
 });
 
 export const updateUserSchema = z.object({
-  name: z.string().min(1).optional(),
+  name: z.string().min(1).transform(sanitizePlainText).optional(),
   role: z.enum(["admin", "editor", "viewer"]).optional(),
   status: z.enum(["active", "invited", "disabled"]).optional(),
 });
