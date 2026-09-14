@@ -32,7 +32,13 @@ export function deriveNameFromEmail(email: string): string {
 }
 
 function toPublic(row: typeof users.$inferSelect) {
-  const { passwordHash, inviteTokenHash, inviteTokenExpiresAt, ...rest } = row;
+  // resetTokenHash/resetTokenExpiresAt were added for forgot-password after
+  // this function was written, and missed being added here — caught during
+  // the security audit's drizzle-orm upgrade smoke test (GET /admin/users
+  // was leaking resetTokenHash to admin callers). Just a hash, and only
+  // exposed to already-privileged admins, but internal security artifacts
+  // like this shouldn't leave the service layer at all.
+  const { passwordHash, inviteTokenHash, inviteTokenExpiresAt, resetTokenHash, resetTokenExpiresAt, ...rest } = row;
   return rest;
 }
 
