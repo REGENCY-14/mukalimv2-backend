@@ -90,11 +90,7 @@ function inviteEmailHtml(opts: { name: string; role: string; acceptUrl: string; 
  * Resend itself reports an error — callers decide how to degrade (see
  * userService.invite, which falls back to returning the raw token). */
 export async function sendInviteEmail(to: string, name: string, token: string, role: string): Promise<string> {
-  const rawFrontendUrl = process.env.FRONTEND_URL;
-  if (!rawFrontendUrl) {
-    throw new Error("FRONTEND_URL must be set (e.g. https://mukalim-v2.vercel.app) — used to build the invite link.");
-  }
-  const frontendUrl = rawFrontendUrl.replace(/\/+$/, "");
+  const frontendUrl = requireFrontendUrl();
   const from = process.env.INVITE_EMAIL_FROM || "Mukalim <onboarding@resend.dev>";
   const acceptUrl = `${frontendUrl}/accept-invite?token=${encodeURIComponent(token)}`;
 
@@ -106,5 +102,86 @@ export async function sendInviteEmail(to: string, name: string, token: string, r
   });
 
   if (error) throw new Error(`Resend rejected the invite email: ${error.message}`);
+  return data?.id ?? "";
+}
+
+function requireFrontendUrl(): string {
+  const raw = process.env.FRONTEND_URL;
+  if (!raw) {
+    throw new Error("FRONTEND_URL must be set (e.g. https://mukalim-v2.vercel.app) — used to build email links.");
+  }
+  return raw.replace(/\/+$/, "");
+}
+
+function passwordResetEmailHtml(opts: { name: string; resetUrl: string; frontendUrl: string }): string {
+  const safeName = escapeHtml(opts.name);
+  const logoUrl = `${opts.frontendUrl}/mukalim/logo.png`;
+
+  return `
+    <div style="background-color:${BRAND.cream};padding:40px 16px;font-family:'Plus Jakarta Sans',Segoe UI,Helvetica,Arial,sans-serif;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;">
+        <tr>
+          <td style="padding-bottom:28px;text-align:center;">
+            <img src="${logoUrl}" alt="Mukalim" height="32" style="height:32px;display:inline-block;" />
+          </td>
+        </tr>
+        <tr>
+          <td style="background-color:#ffffff;border:1px solid ${BRAND.line};border-radius:16px;padding:36px 32px;">
+            <span style="display:block;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:${BRAND.goldDeep};margin-bottom:12px;">
+              Password Reset
+            </span>
+            <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3;color:${BRAND.ink};">
+              Reset your password
+            </h1>
+            <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:${BRAND.brownDeep};">
+              Hi ${safeName},
+            </p>
+            <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:${BRAND.brownDeep};">
+              We received a request to reset your Mukalim admin dashboard password. Click below to choose a new one.
+            </p>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="border-radius:10px;background-color:${BRAND.gold};">
+                  <a href="${opts.resetUrl}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#5c4000;text-decoration:none;">
+                    Reset password
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:28px 0 0;font-size:13px;line-height:1.6;color:${BRAND.brown};opacity:0.75;">
+              This link expires in 1 hour. If you didn't request this, you can safely ignore this email — your password won't be changed.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:24px;text-align:center;font-size:12px;color:${BRAND.brown};opacity:0.6;">
+            MUKALIM &middot; Globally sourced, expertly tested spices
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+}
+
+/** Sends the password reset email and returns the Resend message id. Throws
+ * under the same conditions as sendInviteEmail — see
+ * authService.requestPasswordReset, which deliberately does NOT expose any
+ * fallback token to the caller on failure (unlike invites, the API caller
+ * here is the alleged account owner themselves, not a trusted admin acting
+ * on someone else's behalf — returning the token directly would let anyone
+ * "reset" any email's password without ever proving inbox access). */
+export async function sendPasswordResetEmail(to: string, name: string, token: string): Promise<string> {
+  const frontendUrl = requireFrontendUrl();
+  const from = process.env.INVITE_EMAIL_FROM || "Mukalim <onboarding@resend.dev>";
+  const resetUrl = `${frontendUrl}/reset-password?token=${encodeURIComponent(token)}`;
+
+  const { data, error } = await getClient().emails.send({
+    from,
+    to,
+    subject: "Reset your Mukalim password",
+    html: passwordResetEmailHtml({ name, resetUrl, frontendUrl }),
+  });
+
+  if (error) throw new Error(`Resend rejected the password reset email: ${error.message}`);
   return data?.id ?? "";
 }

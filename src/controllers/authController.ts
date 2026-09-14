@@ -44,6 +44,26 @@ export const acceptInvite = asyncHandler(async (req: Request, res: Response) => 
   res.status(200).json({ user });
 });
 
+// Validated at the route level (validate({ body: forgotPasswordSchema }) /
+// resetPasswordSchema), same pattern as login — unlike acceptInvite/invite
+// above, which parse inline.
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  await authService.requestPasswordReset(email);
+
+  // Identical response whether or not the email matches an account — never
+  // reveals which addresses are registered. See authService for the actual
+  // (also enumeration-safe) logic.
+  res.status(200).json({ message: "If an account exists for that email, a password reset link has been sent." });
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+  const { user, tokens } = await authService.resetPassword(token, password);
+  setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
+  res.status(200).json({ user });
+});
+
 /**
  * Alias for POST /api/admin/users — the same admin-only invite flow, kept
  * reachable under /api/auth/invite too since that's where it's listed in

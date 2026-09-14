@@ -4,7 +4,7 @@ import { requireAuth } from "../middleware/auth";
 import { requireAdmin } from "../middleware/rbac";
 import { validate } from "../middleware/validate";
 import { authRateLimiter } from "../middleware/rateLimit";
-import { loginSchema } from "../schemas/auth";
+import { loginSchema, forgotPasswordSchema, resetPasswordSchema } from "../schemas/auth";
 import { inviteUserSchema } from "../schemas/user";
 
 const router = Router();
@@ -16,5 +16,8 @@ router.get("/session", requireAuth, authController.session);
 
 router.post("/invite", requireAuth, requireAdmin, validate({ body: inviteUserSchema }), authController.invite);
 router.post("/accept-invite", authRateLimiter, authController.acceptInvite);
+
+router.post("/forgot-password", authRateLimiter, validate({ body: forgotPasswordSchema }), authController.forgotPassword);
+router.post("/reset-password", authRateLimiter, validate({ body: resetPasswordSchema }), authController.resetPassword);
 
 export default router;

@@ -127,6 +127,16 @@ src/
   response falls back to `{ emailSent: false, inviteToken }` so the admin
   can deliver the link manually instead. `POST /api/auth/accept-invite`
   exchanges that token + a chosen password to activate the account.
+- Forgot password: `POST /api/auth/forgot-password` (just `email`) always
+  returns the same generic "check your email" response whether or not the
+  address is registered — enumeration-safe, matching the equivalent choice
+  many real auth systems make. If it matches an active, non-disabled
+  account, a 1-hour reset token is emailed via `sendPasswordResetEmail`.
+  Unlike the invite flow, there's no `emailSent`/fallback-token response —
+  the caller here is the alleged account owner, not a trusted admin acting
+  on someone else's behalf, so the token only ever goes out over email.
+  `POST /api/auth/reset-password` (`token` + new `password`, ≥8 chars)
+  completes it and logs the user in, same as accept-invite.
 - The frontend's "preview as" role switcher (`Topbar.tsx`) is a dev-only UI
   affordance with no server counterpart here by design — see the note in
   `docs/API_ENDPOINTS.md`.
@@ -151,7 +161,8 @@ Base path `/api`. Full request/response shapes are in the frontend repo's
 
 **Auth**
 `POST /auth/login` · `POST /auth/refresh` · `POST /auth/logout` ·
-`GET /auth/session` · `POST /auth/invite` (admin) · `POST /auth/accept-invite`
+`GET /auth/session` · `POST /auth/invite` (admin) · `POST /auth/accept-invite` ·
+`POST /auth/forgot-password` · `POST /auth/reset-password`
 
 **Public** (no auth, published content / active categories only)
 `GET /categories` · `GET /categories/:slug` ·
