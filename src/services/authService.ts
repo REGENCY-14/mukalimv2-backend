@@ -5,6 +5,7 @@ import { users } from "../db/schema";
 import { hashPassword, verifyPassword } from "../utils/password";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { AppError } from "../utils/errors";
+import { sendPasswordResetEmail } from "../utils/email";
 import type { AuthUser, Role } from "../types/auth";
 import * as activityService from "./activityService";
 
@@ -96,6 +97,74 @@ export async function acceptInvite(token: string, password: string): Promise<{ u
     .where(eq(users.id, row.id));
 
   await activityService.log({ id: row.id, role: row.role }, "accepted the invite for", `'${row.name}'`);
+
+  return {
+    user: toAuthUser(row),
+    tokens: { accessToken: signAccessToken(row.id, row.role), refreshToken: signRefreshToken(row.id) },
+  };
+}
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour — shorter-lived than invites, standard for reset links
+
+/**
+ * Always resolves the same way regardless of whether the email matches an
+ * account — the controller returns one generic "check your email" response
+ * either way, so this never gives a caller a way to tell which emails are
+ * registered. Silently does nothing for unknown or disabled accounts.
+ *
+ * Unlike issueInviteToken, this does NOT return the raw token to its
+ * caller — it's emailed directly and only ever exists in memory here. The
+ * API caller is the alleged account owner themselves, not a trusted admin
+ * acting on someone else's behalf, so there's no safe way to expose a
+ * fallback token if the email fails to send (that would let anyone "reset"
+ * any address's password without ever proving inbox access) — a failed
+ * send is only logged server-side.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const [row] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+  if (!row || row.status === "disabled") return;
+
+  const token = crypto.randomBytes(32).toString("hex");
+  await db
+    .update(users)
+    .set({ resetTokenHash: hashToken(token), resetTokenExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS) })
+    .where(eq(users.id, row.id));
+
+  try {
+    const messageId = await sendPasswordResetEmail(row.email, row.name, token);
+    console.log(`[authService.requestPasswordReset] Reset email sent to ${row.email} (Resend message id: ${messageId})`);
+  } catch (err) {
+    console.error(`[authService.requestPasswordReset] Failed to send reset email to ${row.email}:`, err);
+  }
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ user: AuthUser; tokens: Tokens }> {
+  const tokenHash = hashToken(token);
+  const [row] = await db.select().from(users).where(eq(users.resetTokenHash, tokenHash)).limit(1);
+
+  // Also re-checks disabled here (not just at request time) — status could
+  // change between the two steps, and a disabled account shouldn't be able
+  // to regain access via a reset link issued before it was disabled.
+  if (!row || !row.resetTokenExpiresAt || row.resetTokenExpiresAt.getTime() < Date.now() || row.status === "disabled") {
+    throw AppError.badRequest("This password reset link is invalid or has expired.");
+  }
+
+  const passwordHash = await hashPassword(password);
+  await db
+    .update(users)
+    .set({
+      passwordHash,
+      // Proving inbox access + setting a real password activates the
+      // account the same way accept-invite does — covers an "invited" user
+      // who uses forgot-password instead of ever completing accept-invite.
+      status: "active",
+      resetTokenHash: null,
+      resetTokenExpiresAt: null,
+      lastLoginAt: new Date(),
+    })
+    .where(eq(users.id, row.id));
+
+  await activityService.log({ id: row.id, role: row.role }, "reset the password for", `'${row.name}'`);
 
   return {
     user: toAuthUser(row),

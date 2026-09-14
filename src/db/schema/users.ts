@@ -22,6 +22,12 @@ export const users = pgTable(
     // never the token itself — see authService.acceptInvite.
     inviteTokenHash: text("invite_token_hash"),
     inviteTokenExpiresAt: timestamp("invite_token_expires_at", { withTimezone: true }),
+    // Separate columns for POST /api/auth/forgot-password + reset-password —
+    // kept independent from the invite token above so an in-flight invite
+    // and a password-reset request never interfere with each other. See
+    // authService.requestPasswordReset / resetPassword.
+    resetTokenHash: text("reset_token_hash"),
+    resetTokenExpiresAt: timestamp("reset_token_expires_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
